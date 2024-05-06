@@ -12,3 +12,25 @@
 + Soal 2 = Danendra Fidel Khansa
 + Soal 3 = Danendra Fidel Khansa
 + Soal 4 = Muhammad Abhinaya Al-Faruqi
+
+## ***MODUL 3***
+  Berikut untuk struktur repository pengumpulan dari hasil praktikum sistem operasi modul 3 :
+  ```
+—soal_1:
+   -auth.c
+   - rate.c
+   - db.c
+
+—soal_2:
+   - dudududu.c
+				
+—soal_3:
+   - actions.c
+   - driver.c
+   - paddock.c
+				
+—soal_4:
+   - client/
+     - client.c 
+   - server/
+     -  server.c
