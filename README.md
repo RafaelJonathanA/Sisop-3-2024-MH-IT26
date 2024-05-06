@@ -34,3 +34,25 @@
      - client.c 
    - server/
      -  server.c
+```
+## ***SOAL 1 (Rafael)***
+## ***PENGERJAAN***
+## ***PENJELASAN PENGERJAAN***
+## ***Dokumentasi***
+
+## ***SOAL 2 (Fidel)***
+## ***PENGERJAAN***
+## ***PENJELASAN PENGERJAAN***
+## ***Dokumentasi***
+
+## ***SOAL 3 (Fidel)***
+## ***PENGERJAAN***
+## ***PENJELASAN PENGERJAAN***
+## ***Dokumentasi***
+
+## ***SOAL 4 (Abhinaya)***
+## ***PENGERJAAN***
+## ***PENJELASAN PENGERJAAN***
+## ***Dokumentasi***
+
+
