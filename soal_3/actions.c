@@ -1,4 +1,4 @@
-//Fungsi actions.c yang nanti akan dipanggil paddock.c
+//Fungsi actions.c yang nanti akan dipanggil Paddock.c
 #include <stdio.h>
 #include <string.h>
 
