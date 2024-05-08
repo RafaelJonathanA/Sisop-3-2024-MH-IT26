@@ -313,51 +313,51 @@ return result;
 ```
 1. Deklarasi Array:
 
-`- Fungsi intToWords dimulai dengan mendeklarasikan tiga array konstan: satuan, belasan, dan puluh. Array ini digunakan untuk menyimpan kata-kata yang mewakili angka dalam bahasa Indonesia.`
+- Fungsi intToWords dimulai dengan mendeklarasikan tiga array konstan: satuan, belasan, dan puluh. Array ini digunakan untuk menyimpan kata-kata yang mewakili angka dalam bahasa Indonesia.
 
 2. Pengalokasian Memori:
 
-`- Fungsi malloc digunakan untuk mengalokasikan memori untuk string result, yang akan menampung hasil konversi angka ke kata-kata.`
+- Fungsi malloc digunakan untuk mengalokasikan memori untuk string result, yang akan menampung hasil konversi angka ke kata-kata.
 
-`- Ukuran memori yang dialokasikan adalah 100 * ukuran char, yang cukup untuk menampung hasil konversi maksimum.`
+- Ukuran memori yang dialokasikan adalah 100 * ukuran char, yang cukup untuk menampung hasil konversi maksimum.
 
 3. Inisialisasi String Kosong:
 
-`- String result diinisialisasi dengan string kosong menggunakan strcpy(result, ""). Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.`
+- String result diinisialisasi dengan string kosong menggunakan strcpy(result, ""). Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.
 
 4. Konversi Ratusan:
 
-`- Jika angka lebih besar dari atau sama dengan 100, maka bagian ratusannya akan dikonversi terlebih dahulu.`
+- Jika angka lebih besar dari atau sama dengan 100, maka bagian ratusannya akan dikonversi terlebih dahulu.
 
-`- Kata yang mewakili bagian ratusan diambil dari array satuan, kemudian ditambahkan dengan kata "ratus".`
+- Kata yang mewakili bagian ratusan diambil dari array satuan, kemudian ditambahkan dengan kata "ratus".
 
-`- Nilai num kemudian di-modulus dengan 100 untuk mendapatkan sisa angka setelah bagian ratusan dihilangkan.`
+- Nilai num kemudian di-modulus dengan 100 untuk mendapatkan sisa angka setelah bagian ratusan dihilangkan.
 
 5. Konversi Puluhan:
 
-`- Jika angka yang tersisa masih lebih besar dari atau sama dengan 20, maka bagian puluhannya akan dikonversi.`
+- Jika angka yang tersisa masih lebih besar dari atau sama dengan 20, maka bagian puluhannya akan dikonversi.
 
-`- Kata yang mewakili bagian puluhan diambil dari array puluh.`
+- Kata yang mewakili bagian puluhan diambil dari array puluh.
 
-`- Sama seperti sebelumnya, nilai num kemudian di-modulus dengan 10 untuk mendapatkan sisa angka setelah bagian puluhan dihilangkan.`
+- Sama seperti sebelumnya, nilai num kemudian di-modulus dengan 10 untuk mendapatkan sisa angka setelah bagian puluhan dihilangkan.
 
 6. Konversi Belasan:
 
-`- Jika angka yang tersisa berada dalam rentang 11-19, maka angka tersebut akan dikonversi menjadi bentuk "belasan".`
+- Jika angka yang tersisa berada dalam rentang 11-19, maka angka tersebut akan dikonversi menjadi bentuk "belasan".
 
-`- Kata yang mewakili bagian belasan diambil dari array belasan.`
+- Kata yang mewakili bagian belasan diambil dari array belasan.
 
 7. Konversi Satuan:
 
-`- Jika angka yang tersisa berada dalam rentang 1-9 (setelah bagian ratusan dan puluhan dihilangkan), maka angka tersebut akan dikonversi menjadi bentuk "satuan".`
+- Jika angka yang tersisa berada dalam rentang 1-9 (setelah bagian ratusan dan puluhan dihilangkan), maka angka tersebut akan dikonversi menjadi bentuk "satuan".
 
-`- Kata yang mewakili bagian satuan diambil dari array satuan.`
+- Kata yang mewakili bagian satuan diambil dari array satuan.
 
 8. Pengembalian Hasil:
 
-`- Hasil konversi disimpan dalam string result.`
+- Hasil konversi disimpan dalam string result.
 
-`- String result kemudian dikembalikan sebagai hasil fungsi.`
+- String result kemudian dikembalikan sebagai hasil fungsi.
 
 ## void writeToLog(const char *operation, int num1, int num2, int result)
 ```
@@ -392,36 +392,37 @@ fclose(logFile);
 ```
 1. Membuka File Log:
 
-`- Fungsi fopen digunakan untuk membuka file "histori.log" dalam mode append ("a"), yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.`
+- Fungsi fopen digunakan untuk membuka file "histori.log" dalam mode append ("a"), yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.
 
 2. Pengecekan Ketersediaan File:
 
-`- Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka (logFile != NULL), maka operasi akan dilanjutkan.`
+- Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka (logFile != NULL), maka operasi akan dilanjutkan.
 
 3. Mengambil Waktu Sekarang:
 
-`- Fungsi time digunakan untuk mengambil waktu sistem saat ini dalam bentuk waktu mentah (rawtime).`
+- Fungsi time digunakan untuk mengambil waktu sistem saat ini dalam bentuk waktu mentah (rawtime).
 
-`- Waktu mentah kemudian diubah menjadi struktur waktu (struct tm) menggunakan fungsi localtime.`
+- Waktu mentah kemudian diubah menjadi struktur waktu (struct tm) menggunakan fungsi localtime.
 
-`- Informasi waktu kemudian diformat sesuai dengan format yang ditentukan ("[%d/%m/%y %H:%M:%S]") menggunakan fungsi strftime.`
+- Informasi waktu kemudian diformat sesuai dengan format yang ditentukan ("[%d/%m/%y %H:%M:%S]") menggunakan fungsi strftime.
 
 4. Konversi Operasi menjadi Uppercase:
 
-`- Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi toupper, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.`
+- Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi toupper, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.
 
 5. Penulisan Pesan Log:
 
-`- Jika result kurang dari 0 (negatif), maka pesan log akan mencatat pesan error dengan format yang sesuai.`
+- Jika result kurang dari 0 (negatif), maka pesan log akan mencatat pesan error dengan format yang sesuai.
 
-`- Jika result tidak negatif, maka pesan log akan mencatat operasi matematika beserta hasilnya dalam format yang sesuai.`
+- Jika result tidak negatif, maka pesan log akan mencatat operasi matematika beserta hasilnya dalam format yang sesuai.
 
-`- Untuk merepresentasikan angka dalam kata-kata, fungsi intToWords digunakan untuk mengonversi num1, num2, dan result menjadi bentuk kata-kata yang sesuai.`
+- Untuk merepresentasikan angka dalam kata-kata, fungsi intToWords digunakan untuk mengonversi num1, num2, dan result menjadi bentuk kata-kata yang sesuai.
 
-`- Pesan log yang terbentuk akan ditulis ke file log menggunakan fungsi fprintf.`
+- Pesan log yang terbentuk akan ditulis ke file log menggunakan fungsi fprintf.
 
 6. Menutup File Log:
-`- Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose`
+
+- Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose
 
 ## int stringToNumber(char *str) 
 ```
@@ -437,19 +438,22 @@ return 0;
 ```
 1. Deklarasi Variabel:
 
-`- Variabel words merupakan array konstan yang berisi representasi string dari angka 1 hingga 9 dalam bahasa Indonesia.`
+- Variabel words merupakan array konstan yang berisi representasi string dari angka 1 hingga 9 dalam bahasa Indonesia.
 
 2. Iterasi Melalui Array:
-`- Fungsi ini melakukan iterasi melalui array words untuk mencocokkan string input str dengan setiap elemen array.`
+   
+- Fungsi ini melakukan iterasi melalui array words untuk mencocokkan string input str dengan setiap elemen array.
 
-3. Pengecekan Kesamaan:
-`- Setiap elemen array words dibandingkan dengan string input str menggunakan fungsi strcmp.`
+4. Pengecekan Kesamaan:
 
-`- Jika terdapat kecocokan antara string input str dengan salah satu elemen array, maka fungsi akan mengembalikan nilai integer yang sesuai dengan indeks elemen tersebut (nilai dari 1 hingga 9).`
+- Setiap elemen array words dibandingkan dengan string input str menggunakan fungsi strcmp.
+
+- Jika terdapat kecocokan antara string input str dengan salah satu elemen array, maka fungsi akan mengembalikan nilai integer yang sesuai dengan indeks elemen tersebut (nilai dari 1 hingga 9).
 
 4. Penanganan String Tidak Valid:
 
-`- Jika tidak ada kecocokan yang ditemukan, maka fungsi akan mengembalikan nilai 0, menandakan bahwa string input tidak valid atau tidak cocok dengan representasi angka dalam bahasa Indonesia.`
+- Jika tidak ada kecocokan yang ditemukan, maka fungsi akan mengembalikan nilai 0, menandakan bahwa string input tidak valid atau tidak cocok dengan representasi angka dalam bahasa Indonesia.
+
 ## int main(int argc, char *argv[]) 
 ```
 //Fungsi main untuk input dan manggil void
@@ -543,33 +547,33 @@ return 0;
 ```
 1. Input Operasi dan Operand:
 
-`- Program memeriksa apakah jumlah argumen command-line sesuai. Jika tidak, program mencetak pesan penggunaan yang benar.`
+- Program memeriksa apakah jumlah argumen command-line sesuai. Jika tidak, program mencetak pesan penggunaan yang benar.
 
-`- Operasi matematika (tambah, kurang, kali, bagi) disediakan sebagai argumen command-line.`
+- Operasi matematika (tambah, kurang, kali, bagi) disediakan sebagai argumen command-line.
 
 2. Input Angka:
 
-`- Pengguna diminta untuk memasukkan dua angka secara berurutan.`
+- Pengguna diminta untuk memasukkan dua angka secara berurutan.
 
 3. Konversi Angka ke Integer:
 
-`- Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungsi stringToNumber.`
+- Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungsi stringToNumber.
 
 4. Pembuatan Pipe dan Fork:
 
-`- Pipe dibuat untuk komunikasi antara proses induk dan anak.`
+- Pipe dibuat untuk komunikasi antara proses induk dan anak.
 
-`- Proses anak dibuat menggunakan fork().`
+- Proses anak dibuat menggunakan fork().
 
 5. Child Process:
 
-`- Proses anak menutup ujung penulisan pipe, membaca hasil operasi dari pipe, dan menampilkan hasilnya di terminal.`
+- Proses anak menutup ujung penulisan pipe, membaca hasil operasi dari pipe, dan menampilkan hasilnya di terminal.
 
-`- Hasil operasi ditulis ke file log menggunakan fungsi writeToLog.`
+- Hasil operasi ditulis ke file log menggunakan fungsi writeToLog.
 
 6. Parent Process:
 
-`- Proses induk menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke pipe, dan menunggu proses anak selesai.`
+- Proses induk menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke pipe, dan menunggu proses anak selesai.
 
 ## ***Dokumentasi***
 
