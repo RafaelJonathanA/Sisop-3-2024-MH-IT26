@@ -1026,6 +1026,10 @@ return 0;
 
 
 ## ***Dokumentasi***
+![Cuplikan layar 2024-05-08 221153](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/4410cdf1-7d8f-463e-911c-f6e7c4280402)
+![Cuplikan layar 2024-05-08 221252](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/4a199bbf-7c3d-4e81-bc61-2a5b11e5140f)
+![Cuplikan layar 2024-05-08 221343](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/1609e3e4-e8dd-42be-8a86-c94a849318dd)
+![Cuplikan layar 2024-05-08 221402](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/4b20635d-4503-45e3-ba09-42dea4b0e075)
 
 ## ***SOAL 4 (Abhinaya)***
 ## ***PENGERJAAN***
