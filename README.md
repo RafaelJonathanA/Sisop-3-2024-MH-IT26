@@ -1026,10 +1026,12 @@ return 0;
 
 
 ## ***Dokumentasi***
-![Cuplikan layar 2024-05-08 221153](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/4410cdf1-7d8f-463e-911c-f6e7c4280402)
-![Cuplikan layar 2024-05-08 221252](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/4a199bbf-7c3d-4e81-bc61-2a5b11e5140f)
-![Cuplikan layar 2024-05-08 221343](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/1609e3e4-e8dd-42be-8a86-c94a849318dd)
-![Cuplikan layar 2024-05-08 221402](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/4b20635d-4503-45e3-ba09-42dea4b0e075)
+![Cuplikan layar 2024-05-08 221153](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/f37a053a-9033-4286-a8d7-87a77ed8ea11)
+![Cuplikan layar 2024-05-08 221252](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/40c6c69f-dd14-4394-adb8-d59128a79611)
+![Cuplikan layar 2024-05-08 221343](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/395754b5-09b1-4c80-a868-48839c34b505)
+![Cuplikan layar 2024-05-08 221402](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/0e9bf9eb-09ee-4c05-80f0-6b018dc00db7)
+
+
 
 ## ***SOAL 4 (Abhinaya)***
 ## ***PENGERJAAN***
