@@ -842,6 +842,189 @@ return 0;
 }
 ```
 ## ***PENJELASAN PENGERJAAN***
+## Actions.c
+```
+#include <stdio.h>
+#include <string.h>
+
+char* gap(float distance) {
+    if (distance < 3.5)
+        return "Gogogo";
+    else if (distance >= 3.5 && distance <= 10)
+        return "Push";
+    else
+        return "Stay out of trouble";
+}
+
+char* fuel(int fuel_percent) {
+    if (fuel_percent > 80)
+        return "Push Push Push";
+    else if (fuel_percent >= 50 && fuel_percent <= 80)
+        return "You can go";
+    else
+        return "Conserve Fuel";
+}
+
+char* tire(int tire_usage) {
+    if (tire_usage > 80)
+        return "Go Push Go Push";
+    else if (tire_usage >= 50 && tire_usage <= 80)
+        return "Good Tire Wear";
+    else if (tire_usage >= 30 && tire_usage < 50)
+        return "Conserve Your Tire";
+    else
+        return "Box Box Box";
+}
+
+char* tire_change(char* current_tire) {
+    if (strcmp(current_tire, "Soft") == 0)
+        return "Mediums Ready";
+    else if (strcmp(current_tire, "Medium") == 0)
+        return "Box for Softs";
+    else
+        return "Invalid tire type";
+}
+```
+1. gap(float distance): Fungsi ini mengambil jarak sebagai argumen dan memberikan rekomendasi berdasarkan jarak tersebut. Jika jarak kurang dari 3,5, pengemudi disarankan untuk 'Gogogo'. Jika jarak antara 3,5 dan 10, pengemudi disarankan untuk 'Push'. Jika jarak lebih dari 10, pengemudi disarankan untuk 'Stay out of trouble'.
+
+2. fuel(int fuel_percent): Fungsi ini mengambil persentase bahan bakar sebagai argumen dan memberikan rekomendasi berdasarkan tingkat bahan bakar tersebut. Jika bahan bakar lebih dari 80%, pengemudi disarankan untuk 'Push Push Push'. Jika bahan bakar antara 50% dan 80%, pengemudi disarankan untuk 'You can go'. Jika bahan bakar kurang dari 50%, pengemudi disarankan untuk 'Conserve Fuel'.
+
+3. tire(int tire_usage): Fungsi ini mengambil persentase penggunaan ban sebagai argumen dan memberikan rekomendasi berdasarkan kondisi ban tersebut. Jika penggunaan ban lebih dari 80%, pengemudi disarankan untuk 'Go Push Go Push'. Jika penggunaan ban antara 50% dan 80%, pengemudi disarankan untuk 'Good Tire Wear'. Jika penggunaan ban antara 30% dan 50%, pengemudi disarankan untuk 'Conserve Your Tire'. Jika penggunaan ban kurang dari 30%, pengemudi disarankan untuk 'Box Box Box'.
+
+4. tire_change(char* current_tire): Fungsi ini mengambil jenis ban saat ini sebagai argumen dan memberikan rekomendasi tentang pergantian ban. Jika jenis ban saat ini adalah 'Soft', pengemudi disarankan untuk 'Mediums Ready'. Jika jenis ban saat ini adalah 'Medium', pengemudi disarankan untuk 'Box for Softs'. Jika jenis ban saat ini tidak valid, fungsi akan mengembalikan 'Invalid tire type'.
+
+Fungsi diatas akan dipanggil oleh paddock.c untuk melengkapi proses pada paddock.c
+
+## Paddock.c
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include "actions.c" // Panggil Fungsi Actions.c lewat library
+
+#define PORT 8080
+#define MAX_COMMAND_SIZE 100
+
+// Fungsi nulis ke log yang isinya driver dan paddock
+void log_message(char *source, char *command, char *info) {
+    time_t now;
+    struct tm *local_time;
+    char timestamp[30];
+
+    time(&now);
+    local_time = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%d/%m/%Y %H:%M:%S", local_time);
+
+    FILE *log_file = fopen("race.log", "a");
+    fprintf(log_file, "[%s] [%s]: [%s] [%s]\n", source, timestamp, command, info);
+    fclose(log_file);
+}
+
+// Fungsi RPC buat manggil actions.c ke program paddock.c
+void handle_rpc_call(int new_socket) {
+    char buffer[MAX_COMMAND_SIZE] = {0};
+    char response[MAX_COMMAND_SIZE] = {0};
+    char command[MAX_COMMAND_SIZE];
+    char info[MAX_COMMAND_SIZE];
+    char source[] = "Driver"; //nambahin driver ke log sesuai soal
+    char paddock_source[] = "Paddock"; //nambahin paddock ke log sesuai soal
+
+    read(new_socket, buffer, MAX_COMMAND_SIZE);
+    sscanf(buffer, "Command: %s\nInfo: %[^\n]", command, info);
+
+//if else command input soal (Gap,Fuel,Tire<Tire Change)
+    if (strcmp(command, "Gap") == 0) {
+        float distance;
+        sscanf(info, "%f", &distance);
+        snprintf(response, MAX_COMMAND_SIZE, "%s", gap(distance));
+    } else if (strcmp(command, "Fuel") == 0) {
+        int fuel_percent;
+        sscanf(info, "%d", &fuel_percent);
+        snprintf(response, MAX_COMMAND_SIZE, "%s", fuel(fuel_percent));
+    } else if (strcmp(command, "Tire") == 0) {
+        int tire_usage;
+        sscanf(info, "%d", &tire_usage);
+        snprintf(response, MAX_COMMAND_SIZE, "%s", tire(tire_usage));
+    } else if (strcmp(command, "TireChange") == 0) {
+        snprintf(response, MAX_COMMAND_SIZE, "%s", tire_change(info));
+    } else {
+        snprintf(response, MAX_COMMAND_SIZE, "Invalid command");
+    }
+    write(new_socket, response, strlen(response));
+    log_message(source, command, info); // Log untuk driver
+    log_message(paddock_source, command, response); // Log untuk paddock
+   // Print response 
+    printf("[Paddock]: [%s]\n", response);
+}
+
+//Fungsi Main
+int main() {
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    int opt = 1;
+    int addrlen = sizeof(address);
+
+    //Bikin socket file
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+
+   //Nyambungin ke port 8080
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+            perror("accept");
+            exit(EXIT_FAILURE);
+        }
+        handle_rpc_call(new_socket);
+        close(new_socket);
+    }
+return 0;
+}
+```
+1. Library
+
+#include <stdio.h> = fungsi-fungsi input-output c.
+
+#include <stdlib.h> = fungsi-fungsi dasar seperti alokasi memori
+
+#include <unistd.h> = fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
+
+#include <string.h> = fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
+
+#include <time.h> = fungsi-fungsi untuk manipulasi waktu.
+
+#include <sys/types.h> = definisi tipe data dasar yang digunakan dalam pemrograman sistem.
+
+#include <sys/socket.h> = deklarasi fungsi, struktur data, dan konstanta yang digunakan untuk membuat dan mengelola socket.
+
+#include <netinet/in.h> = deklarasi struktur data dan konstanta yang digunakan untuk menangani alamat Internet (IPv4 dan IPv6).
+
+#include "actions.c" = Panggil Fungsi Actions.c lewat library
+
+
 ## ***Dokumentasi***
 
 ## ***SOAL 4 (Abhinaya)***
