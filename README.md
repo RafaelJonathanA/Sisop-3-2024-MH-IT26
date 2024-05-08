@@ -576,6 +576,9 @@ return 0;
 - Proses induk menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke pipe, dan menunggu proses anak selesai.
 
 ## ***Dokumentasi***
+![Cuplikan layar 2024-05-08 215449](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/0b6678a2-de3f-4fa9-8f86-a6375c4a9a92)
+![Cuplikan layar 2024-05-08 215511](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/a985d66e-b588-45b1-b785-dcc48d79afec)
+
 
 ## ***SOAL 3 (Fidel)***
 Shall Leglerg🥶 dan Carloss Signs 😎 adalah seorang pembalap F1 untuk tim Ferrari 🥵. Mobil F1 memiliki banyak pengaturan, seperti penghematan ERS, Fuel, Tire Wear dan lainnya. Pada minggu ini ada race di sirkuit Silverstone. Malangnya, seluruh tim Ferrari diracun oleh Super Max Max pada hari sabtu sehingga seluruh kru tim Ferrari tidak bisa membantu Shall Leglerg🥶 dan Carloss Signs 😎 dalam race. Namun, kru Ferrari telah menyiapkan program yang bisa membantu mereka dalam menyelesaikan race secara optimal. Program yang dibuat bisa mengatur pengaturan - pengaturan dalam mobil F1 yang digunakan dalam balapan. Programnya ber ketentuan sebagai berikut:
