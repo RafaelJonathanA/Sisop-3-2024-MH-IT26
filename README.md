@@ -249,6 +249,150 @@ return 0;
 }
 ```
 ## ***PENJELASAN PENGERJAAN***
+### Library
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
+#include <time.h>
+#include <math.h>
+
+```
+- <stdio.h>: fungsi-fungsi input-output c.
+
+- <stdlib.h>: fungsi-fungsi dasar seperti alokasi memori, konversi angka, dan fungsi pengaturan lingkungan.
+
+- <unistd.h>: fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
+
+- <sys/wait.h>: fungsi-fungsi untuk menangani proses anak.
+
+- <string.h>: fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
+
+- <ctype.h>: fungsi-fungsi untuk operasi karakter seperti toupper().
+
+- <errno.h>: definisi variabel errno yang menyimpan kode kesalahan terakhir.
+
+- <time.h>: fungsi-fungsi untuk manipulasi waktu.
+
+- <math.h>: fungsi-fungsi matematika
+
+### char *intToWords(int num)
+```
+char *intToWords(int num) {
+// Array huruf yang digunakan untuk konversi angka ke kata
+const char *satuan[] = {"", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"};
+    const char *belasan[] = {"", "sebelas", "dua belas", "tiga belas", "empat belas", "lima belas", "enam belas", "tujuh belas", "delapan belas", "sembilan belas"};
+       const char *puluh[] = {"", "sepuluh", "dua puluh", "tiga puluh", "empat puluh", "lima puluh", "enam puluh", "tujuh puluh", "delapan puluh", "sembilan puluh"};
+
+  char *result = (char *)malloc(100 * sizeof(char));
+    strcpy(result, "");
+// Konversi ratusan
+if (num >= 100) {
+        strcat(result, satuan[num / 100]);
+        strcat(result, " ratus ");
+        num %= 100;
+    }
+// Konversi puluhan
+if (num >= 20) {
+        strcat(result, puluh[num / 10]);
+        strcat(result, " ");
+        num %= 10;
+    }
+// Konversi belasan
+if (num >= 11 && num <= 19) {
+        strcat(result, belasan[num - 10]);
+    } else if (num >= 1 && num <= 9) { // Konversi satuan
+        strcat(result, satuan[num]);
+    }
+return result;
+}
+```
+Deklarasi Array:
+
+`- Fungsi intToWords dimulai dengan mendeklarasikan tiga array konstan: satuan, belasan, dan puluh. Array ini digunakan untuk menyimpan kata-kata yang mewakili angka dalam bahasa Indonesia.`
+
+Pengalokasian Memori:
+
+`- Fungsi malloc digunakan untuk mengalokasikan memori untuk string result, yang akan menampung hasil konversi angka ke kata-kata.`
+
+`- Ukuran memori yang dialokasikan adalah 100 * ukuran char, yang cukup untuk menampung hasil konversi maksimum.`
+
+3. Inisialisasi String Kosong:
+
+`- String result diinisialisasi dengan string kosong menggunakan strcpy(result, ""). Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.`
+
+4. Konversi Ratusan:
+
+`- Jika angka lebih besar dari atau sama dengan 100, maka bagian ratusannya akan dikonversi terlebih dahulu.`
+
+`- Kata yang mewakili bagian ratusan diambil dari array satuan, kemudian ditambahkan dengan kata "ratus".`
+
+`- Nilai num kemudian di-modulus dengan 100 untuk mendapatkan sisa angka setelah bagian ratusan dihilangkan.`
+
+5. Konversi Puluhan:
+
+`- Jika angka yang tersisa masih lebih besar dari atau sama dengan 20, maka bagian puluhannya akan dikonversi.`
+
+`- Kata yang mewakili bagian puluhan diambil dari array puluh.`
+
+`- Sama seperti sebelumnya, nilai num kemudian di-modulus dengan 10 untuk mendapatkan sisa angka setelah bagian puluhan dihilangkan.`
+
+6. Konversi Belasan:
+
+`- Jika angka yang tersisa berada dalam rentang 11-19, maka angka tersebut akan dikonversi menjadi bentuk "belasan".`
+
+`- Kata yang mewakili bagian belasan diambil dari array belasan.`
+
+7. Konversi Satuan:
+
+`- Jika angka yang tersisa berada dalam rentang 1-9 (setelah bagian ratusan dan puluhan dihilangkan), maka angka tersebut akan dikonversi menjadi bentuk "satuan".`
+
+`- Kata yang mewakili bagian satuan diambil dari array satuan.`
+
+8. Pengembalian Hasil:
+
+`- Hasil konversi disimpan dalam string result.`
+
+`- String result kemudian dikembalikan sebagai hasil fungsi.`
+
+### void writeToLog(const char *operation, int num1, int num2, int result)
+
+1. Membuka File Log:
+
+`- Fungsi fopen digunakan untuk membuka file "histori.log" dalam mode append ("a"), yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.`
+
+2. Pengecekan Ketersediaan File:
+
+`- Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka (logFile != NULL), maka operasi akan dilanjutkan.`
+
+3. Mengambil Waktu Sekarang:
+
+`- Fungsi time digunakan untuk mengambil waktu sistem saat ini dalam bentuk waktu mentah (rawtime).`
+
+`- Waktu mentah kemudian diubah menjadi struktur waktu (struct tm) menggunakan fungsi localtime.`
+
+`- Informasi waktu kemudian diformat sesuai dengan format yang ditentukan ("[%d/%m/%y %H:%M:%S]") menggunakan fungsi strftime.`
+
+4. Konversi Operasi menjadi Uppercase:
+
+`- Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi toupper, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.`
+
+5. Penulisan Pesan Log:
+
+`- Jika result kurang dari 0 (negatif), maka pesan log akan mencatat pesan error dengan format yang sesuai.`
+
+`- Jika result tidak negatif, maka pesan log akan mencatat operasi matematika beserta hasilnya dalam format yang sesuai.`
+
+`- Untuk merepresentasikan angka dalam kata-kata, fungsi intToWords digunakan untuk mengonversi num1, num2, dan result menjadi bentuk kata-kata yang sesuai.`
+
+`- Pesan log yang terbentuk akan ditulis ke file log menggunakan fungsi fprintf.`
+
+6. Menutup File Log:
+`- Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose`
 
 ## ***Dokumentasi***
 
