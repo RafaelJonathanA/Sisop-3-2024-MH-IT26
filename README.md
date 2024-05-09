@@ -1006,24 +1006,153 @@ return 0;
 ```
 1. Library
 
-#include <stdio.h> = fungsi-fungsi input-output c.
+- #include <stdio.h> = fungsi-fungsi input-output c.
 
-#include <stdlib.h> = fungsi-fungsi dasar seperti alokasi memori
+- #include <stdlib.h> = fungsi-fungsi dasar seperti alokasi memori
 
-#include <unistd.h> = fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
+- #include <unistd.h> = fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
 
-#include <string.h> = fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
+- #include <string.h> = fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
 
-#include <time.h> = fungsi-fungsi untuk manipulasi waktu.
+- #include <time.h> = fungsi-fungsi untuk manipulasi waktu.
 
-#include <sys/types.h> = definisi tipe data dasar yang digunakan dalam pemrograman sistem.
+- #include <sys/types.h> = definisi tipe data dasar yang digunakan dalam pemrograman sistem.
 
-#include <sys/socket.h> = deklarasi fungsi, struktur data, dan konstanta yang digunakan untuk membuat dan mengelola socket.
+- #include <sys/socket.h> = deklarasi fungsi, struktur data, dan konstanta yang digunakan untuk membuat dan mengelola socket.
 
-#include <netinet/in.h> = deklarasi struktur data dan konstanta yang digunakan untuk menangani alamat Internet (IPv4 dan IPv6).
+- #include <netinet/in.h> = deklarasi struktur data dan konstanta yang digunakan untuk menangani alamat Internet (IPv4 dan IPv6).
 
-#include "actions.c" = Panggil Fungsi Actions.c lewat library
+- #include "actions.c" = Panggil Fungsi Actions.c lewat library
 
+2.Define
+#define PORT 8080:
+
+- Ini mendefinisikan konstanta PORT dengan nilai 8080 dan konstanta ini digunakan untuk menentukan nomor port yang akan digunakan oleh server untuk menerima koneksi dari klien.
+
+#define MAX_COMMAND_SIZE 100:
+
+- Ini mendefinisikan konstanta MAX_COMMAND_SIZE dengan nilai 100.
+
+- Konstanta ini digunakan untuk menentukan ukuran maksimum pesan yang dapat diterima oleh server dari klien.
+
+- Penggunaan konstanta ini memungkinkan program untuk mengalokasikan memori dengan benar saat menerima atau memproses pesan dari klien.**
+
+3. void log_message(char *source, char *command, char *info)
+
+Fungsi ini digunakan untuk menulis pesan log ke file "race.log". Pesan log ini berisi informasi tentang sumber pesan (source), waktu pesan (timestamp), jenis perintah (command), dan informasi tambahan (info). Fungsi ini menggunakan fungsi time() dan localtime() dari library time.h untuk mendapatkan waktu lokal dan fprintf() untuk menulis pesan ke file.
+
+4. void handle_rpc_call(int new_socket)
+
+Fungsi ini merupakan inti dari server. Ini menerima permintaan dari klien melalui socket, memproses permintaan tersebut, dan mengirimkan respons kembali ke klien. Beberapa langkah yang dilakukan adalah:
+
+- Membaca pesan dari socket klien ke dalam buffer.
+
+- Mem-parse pesan menjadi jenis perintah (command) dan informasi tambahan (info).
+
+- Berdasarkan jenis perintah, fungsi memanggil fungsi yang sesuai dari file "actions.c" (yang diimpor melalui preprocessor directive) untuk memproses informasi tambahan.
+
+- Menyiapkan respons berdasarkan hasil pemrosesan dan menulisnya kembali ke socket klien.
+
+- Mencatat pesan log untuk kedua sumber pesan (driver dan paddock).
+
+- Mencetak respons ke konsol untuk melacak aktivitas server.
+
+5. int main ()
+
+Fungsi main adalah titik masuk utama program. Pada fungsi ini:
+
+- Socket server dibuat menggunakan socket() dan dikonfigurasi untuk mendengarkan koneksi di PORT yang ditentukan.
+
+- Loop tak terbatas dimulai, dimana server terus menerima koneksi baru dari klien menggunakan accept().
+
+- Setiap koneksi baru dihandle menggunakan fungsi handle_rpc_call.
+
+- Setelah selesai menangani koneksi, socket baru ditutup dengan close().
+
+## Driver.c
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+
+#define PORT 8080
+#define MAX_COMMAND_SIZE 100
+
+//Fungsi untuk ngirim input command pake RPC ke paddock.c
+void send_rpc_command(char* command, char* info) {
+    struct sockaddr_in serv_addr;
+    int sock = 0, valread;
+    char buffer[MAX_COMMAND_SIZE] = {0};
+
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+return;
+    }
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+
+    // Konversi IP
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
+        printf("\nInvalid address/ Address not supported \n");
+return;
+    }
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        printf("\nConnection Failed \n");
+return;
+    }
+    snprintf(buffer, MAX_COMMAND_SIZE, "Command: %s\nInfo: %s\n", command, info);
+    send(sock , buffer , strlen(buffer) , 0 );
+    printf("[Driver] : [%s] [%s]\n", command, info);
+    valread = read( sock , buffer, MAX_COMMAND_SIZE);
+    printf("[Paddock]: [%s]\n",buffer );
+}
+//Fungsi main untuk input command di soal
+int main(int argc, char *argv[]) {
+    if (argc != 5 || strcmp(argv[1], "-c") != 0) {
+        printf("Usage: %s -c <Command> -i <Info>\n", argv[0]);
+        return 1;
+    }
+    char* command = argv[2];
+    char* info = argv[4];
+    send_rpc_command(command, info);
+return 0;
+}
+```
+1.Library dan  Define
+
+Untuk library dan define sama seperti pada **paddock.c**
+
+2.void send_rpc_command(char* command, char* info)
+
+Fungsi ini digunakan untuk mengirimkan permintaan RPC ke server. Beberapa langkah yang dilakukan adalah:
+
+- Membuat socket menggunakan socket() untuk menghubungkan klien ke server.
+
+- Mengatur alamat server dan port yang dituju menggunakan struct sockaddr_in.
+
+- Menghubungkan klien ke server menggunakan connect().
+
+- Membuat pesan RPC berdasarkan perintah dan informasi yang diberikan oleh pengguna.
+
+- Mengirimkan pesan ke server menggunakan send().
+
+- Menerima respons dari server menggunakan read().
+
+- Mencetak pesan respons ke konsol untuk memantau aktivitas klien.
+
+3. int main()
+
+Fungsi main adalah titik masuk utama program. Pada fungsi ini:
+
+- Dilakukan pemeriksaan terhadap argumen yang diberikan saat menjalankan program.
+
+- Jika argumen tidak sesuai, program mencetak pesan penggunaan dan keluar dengan kode kesalahan.
+
+- Jika argumen sesuai, perintah dan informasi dari argumen digunakan untuk memanggil fungsi send_rpc_command.
 
 ## ***Dokumentasi***
 ![Cuplikan layar 2024-05-08 221153](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/f37a053a-9033-4286-a8d7-87a77ed8ea11)
