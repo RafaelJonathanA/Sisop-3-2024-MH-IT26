@@ -755,6 +755,10 @@ Dan kode ini berfungsi untuk memindahkan semua file yang ada di new-data sesuai 
 
 
 ## ***Dokumentasi***
+![Auth](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150375098/564f5677-ff18-48b7-be29-d93e7fe4c6ae)
+![rate](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150375098/0d108b00-8c3b-47a6-ab98-80d8588a20ae)
+![Kosong](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150375098/98d2bdae-b0d2-46bd-bc4f-819aaa16fc58)
+![Pindah](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150375098/a1dfee40-1318-48ba-a7f2-950d75beac8e)
 
 ## ***SOAL 2 (Fidel)***
 
