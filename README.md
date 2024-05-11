@@ -1874,10 +1874,9 @@ b. client.c di dalam folder client dan server.c di dalam folder server
 
 c. Client berfungsi sebagai pengirim pesan dan dapat menerima pesan dari server.
 
-d. Server berfungsi sebagai penerima pesan dari client dan hanya menampilkan pesan perintah client saja.  
+d. Server berfungsi sebagai penerima pesan dari client dan hanya menampilkan pesan perintah client saja. 
 
 e. Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman data antara client ke server dan server ke client.
-```
 - Menampilkan seluruh judul
 - Menampilkan judul berdasarkan genre
 - Menampilkan judul berdasarkan hari
@@ -1886,8 +1885,8 @@ e. Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman dat
 - Melakukan edit anime berdasarkan judul
 - Melakukan delete berdasarkan judul
 - Selain command yang diberikan akan menampilkan tulisan “Invalid Command”
-```
 f. Karena Lewis juga ingin track anime yang ditambah, diubah, dan dihapus. Maka dia membuat server dapat mencatat anime yang dihapus dalam sebuah log yang diberi nama change.log.
+
 ```
 Format: [date] [type] [massage]
 Type: ADD, EDIT, DEL
@@ -1896,9 +1895,11 @@ Ex:
 [29/03/24] [EDIT] Kamis,Comedy,Kanokari,completed diubah menjadi Jumat,Action,Naruto,completed.
 [29/03/24] [DEL] Naruto berhasil dihapus.
 ```
-g. Koneksi antara client dan server tidak akan terputus jika ada kesalahan input dari client, cuma terputus jika user mengirim pesan “exit”. **Program exit** dilakukan pada sisi client.
+
+g. Koneksi antara client dan server tidak akan terputus jika ada kesalahan input dari client, cuma terputus jika user mengirim pesan “exit”. Program exit dilakukan pada sisi client.
 
 h. Hasil akhir:
+```
 soal_4/
     ├── change.log
     ├── client/
@@ -1906,9 +1907,425 @@ soal_4/
     ├── myanimelist.csv
     └── server/
         └── server.c
-
+```
 ## ***PENGERJAAN***
+***client.c***
+```c
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <time.h>
+#define PORT 8080
+  
+int main(int argc, char const *argv[]) {
+    struct sockaddr_in address;
+    int sock = 0, valread;
+    struct sockaddr_in serv_addr;
+    char hello[1024];
+    char text[1024];
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        return -1;
+    }
+  
+    memset(&serv_addr, '0', sizeof(serv_addr));
+  
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+      
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
+        printf("\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+  
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        printf("\nConnection Failed \n");
+        return -1;
+    }
+
+    char line[512];
+    while(1){
+        memset(text,0,sizeof(text));
+        printf("You: ");
+        scanf("%s", hello);
+        scanf("%[^\n]%*c", text);
+        
+        FILE* filePtr;
+        FILE* flog;
+
+        if ((strcmp(hello, "tampilkan") == 0) || (strcmp(hello, "hari") == 0) || (strcmp(hello, "genre") == 0) || (strcmp(hello, "status") == 0)){
+            filePtr = fopen("myanimelist.csv", "r");
+        } else if (strcmp(hello, "add") == 0){
+            filePtr = fopen("myanimelist.csv", "a");
+            flog = fopen("change.log", "a");
+        }
+        int count = 1;
+
+
+        if (strcmp(hello, "tampilkan") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strPtr = strtok(line, ",");
+                for (int i=0; i<2; i++){
+                    strPtr = strtok(NULL, ",");
+                }
+                printf("%d. %s\n", count, strPtr);
+                count++;
+            }
+            fclose(filePtr);
+
+        } else if (strcmp(hello, "hari") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strHari = strtok(line, ",");
+                if (strcmp(text+1, strHari) == 0){
+                   for (int i=0; i<2; i++){
+                        strHari = strtok(NULL, ",");
+                   }
+                   printf("%d. %s\n", count, strHari);
+                   count++; 
+                }
+            }
+            fclose(filePtr);
+
+        } else if (strcmp(hello, "status") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strName = strtok(line, ",");
+                for (int i=0; i<2; i++){
+                    strName = strtok(NULL, ",");
+                }
+                if (strcmp(text+1, strName) == 0){
+                    strName = strtok(NULL, ",");
+                    printf("%s\n", strName);
+                    break;
+                }
+            }
+            fclose(filePtr);
+
+        } else if (strcmp(hello, "genre") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strGenre = strtok(line, ",");
+                strGenre = strtok(NULL, ",");
+                if (strcmp(text+1, strGenre) == 0){
+                    strGenre = strtok(NULL, ",");
+                    printf("%d. %s\n", count, strGenre);
+                    count++;
+                }
+            }
+            fclose(filePtr);
+        } else if (strcmp(hello, "add") == 0){
+            
+            char buff[20];
+            struct tm *sTm;
+
+            time_t now = time (0);
+            sTm = gmtime (&now);
+
+            strftime (buff, sizeof(buff), "%d/%m/%y", sTm);
+
+            char *str = strtok(text, ",");
+            str = strtok(NULL, ",");
+            str = strtok(NULL, ",");
+
+            fprintf(filePtr, "\n");
+            fprintf(filePtr, "%s\n", text+1);
+            fprintf(flog, "[ADD] [%s] %s ditambahkan", buff, str);
+            fclose(filePtr);
+            fclose(flog);
+        } else if (strcmp(hello, "exit") != 0){
+            printf("invalid command\n");
+        }
+
+        strcat(hello, text);
+        send(sock , hello , strlen(hello) , 0 );
+        if (strcmp(hello, "exit") == 0) break;
+        
+    }
+    
+    return 0;
+}
+```
+***server.c***
+```c
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#define PORT 8080
+
+int main(int argc, char const *argv[]) {
+    int server_fd, new_socket, valread;
+    struct sockaddr_in address;
+    int opt = 1;
+    int addrlen = sizeof(address);
+      
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+      
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons( PORT );
+      
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+
+    while(1){
+        char buffer[1024] = {0};
+        valread = read( new_socket , buffer, 1024);
+        if (strcmp(buffer, "exit") == 0) break;
+        printf("received: %s\n", buffer);
+    }
+    
+    return 0;
+}
+```
 ## ***PENJELASAN PENGERJAAN***
+***client.c***
+
+kode tersebut berfungsi sebagai client yang dapat menerima perintah dari user dan akan dikirimkan melalui socket ke bagian server, client.c juga berfungsi sebagai tempat memanipulasi csv filenya dan menuliskan ke change.log nya.
+
+
+```c
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <time.h>
+#define PORT 8080
+  
+int main(int argc, char const *argv[]) {
+    struct sockaddr_in address;
+    int sock = 0, valread;
+    struct sockaddr_in serv_addr;
+    char hello[1024];
+    char text[1024];
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        return -1;
+    }
+  
+    memset(&serv_addr, '0', sizeof(serv_addr));
+  
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+      
+    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
+        printf("\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+  
+    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        printf("\nConnection Failed \n");
+        return -1;
+    }
+```
+bagian kode tersebut untuk menyambungkan client ke server agar dapat mengirimkan perintah yang dari client ke server lalu di tampilkan oleh server juga
+
+
+```c
+        memset(text,0,sizeof(text));
+        printf("You: ");
+        scanf("%s", hello);
+        scanf("%[^\n]%*c", text);
+        
+        FILE* filePtr;
+        FILE* flog;
+
+        if ((strcmp(hello, "tampilkan") == 0) || (strcmp(hello, "hari") == 0) || (strcmp(hello, "genre") == 0) || (strcmp(hello, "status") == 0)){
+            filePtr = fopen("myanimelist.csv", "r");
+        } else if (strcmp(hello, "add") == 0){
+            filePtr = fopen("myanimelist.csv", "a");
+            flog = fopen("change.log", "a");
+        }
+        int count = 1;
+```
+bagian kode tersebut untuk menerima perintah yang dibagi menjadi dua variabel yaitu hello dan text, setiap variabel hello mendapatkan nilai "tampilkan", "hari", "genre", dan "status" maka akan membuka file (fopen) myanimelist.csv dengan kondisi "r" yaitu read. Jika variabel hello mendapatkan nilai "add" maka akan membuka file (fopen) myanimelist.csv dengan kondisi "a" append
+
+
+```c
+        if (strcmp(hello, "tampilkan") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strPtr = strtok(line, ",");
+                for (int i=0; i<2; i++){
+                    strPtr = strtok(NULL, ",");
+                }
+                printf("%d. %s\n", count, strPtr);
+                count++;
+            }
+            fclose(filePtr);
+
+        } else if (strcmp(hello, "hari") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strHari = strtok(line, ",");
+                if (strcmp(text+1, strHari) == 0){
+                   for (int i=0; i<2; i++){
+                        strHari = strtok(NULL, ",");
+                   }
+                   printf("%d. %s\n", count, strHari);
+                   count++; 
+                }
+            }
+            fclose(filePtr);
+
+        } else if (strcmp(hello, "status") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strName = strtok(line, ",");
+                for (int i=0; i<2; i++){
+                    strName = strtok(NULL, ",");
+                }
+                if (strcmp(text+1, strName) == 0){
+                    strName = strtok(NULL, ",");
+                    printf("%s\n", strName);
+                    break;
+                }
+            }
+            fclose(filePtr);
+
+        } else if (strcmp(hello, "genre") == 0){
+            while (fgets(line, 512, filePtr) != NULL){
+                char *strGenre = strtok(line, ",");
+                strGenre = strtok(NULL, ",");
+                if (strcmp(text+1, strGenre) == 0){
+                    strGenre = strtok(NULL, ",");
+                    printf("%d. %s\n", count, strGenre);
+                    count++;
+                }
+            }
+            fclose(filePtr);
+        } else if (strcmp(hello, "add") == 0){
+            
+            char buff[20];
+            struct tm *sTm;
+
+            time_t now = time (0);
+            sTm = gmtime (&now);
+
+            strftime (buff, sizeof(buff), "%d/%m/%y", sTm);
+
+            char *str = strtok(text, ",");
+            str = strtok(NULL, ",");
+            str = strtok(NULL, ",");
+
+            fprintf(filePtr, "\n");
+            fprintf(filePtr, "%s\n", text+1);
+            fprintf(flog, "[ADD] [%s] %s ditambahkan", buff, str);
+            fclose(filePtr);
+            fclose(flog);
+```
+bagian kode ini adalah definisi dari setiap kondisi sesuai dengan variabel hello nya, jika variabel hello mendapatkan nilai "tampilkan" maka dia akan menampilkan semua judul anime yang ada di myanimelist.csv, jika variabel hello mendapatkan nilai "hari"
+maka dia akan mengeluarkan anime apa yang akan tayang di hari sesuai dengan nilai yang ada di variabel text, jika hello mendapatkan nilai "status" maka dia akan menampilkan status dari anime tersebut apakah ongoing atau completed, jika hello mendapatkan nilai "genre" maka dia akan menampilkan seluruh anime dengan genre yang ada di text variabel, jika variabel hello mendapatkan nilai "add" maka dia akan menambahkan data baru tersebut ke csv filenya dan akan mencatat setiap perubahan ke change.log. Cara untuk mendapatkan data yang ada di csv file kita menggunakan fungsi strtok untuk tiap tokennya dan fgets untuk setiap linenya.
+
+
+```c
+        } else if (strcmp(hello, "exit") != 0){
+            printf("invalid command\n");
+        }
+
+        strcat(hello, text);
+        send(sock , hello , strlen(hello) , 0 );
+        if (strcmp(hello, "exit") == 0) break;
+        
+    }
+```
+kode ini berfungsi sebagai kondisi exit, menerima invalid commandnya dan mengirimkan perintah tersebut ke servernya, jika hello tidak sesuai dengan kondisi-kondisi yang ada diatas maka dia akan mengeluarkan invalid command dan jika hello bernilai "exit" maka dia akan keluar dari program tersebut. strcat untuk menggabungkan kedua variabel menjadi satu variabel hello dan akan dikirimkan ke server
+
+
+***server.c***
+
+server.c berfungsi sebagai penerima perintah dari client.c dan ditampilkan di layar perintah apa saja yang telah dijalankan di client.c
+
+
+```c
+#include <stdio.h>
+#include <sys/socket.h>
+#include <stdlib.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <unistd.h>
+#define PORT 8080
+
+int main(int argc, char const *argv[]) {
+    int server_fd, new_socket, valread;
+    struct sockaddr_in address;
+    int opt = 1;
+    int addrlen = sizeof(address);
+      
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+      
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons( PORT );
+      
+    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address))<0) {
+        perror("bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+```
+bagian kode tersebut untuk menyambungkan server ke client melalui socket agar dapat menerima pesan dari client
+
+
+```c
+    while(1){
+        char buffer[1024] = {0};
+        valread = read( new_socket , buffer, 1024);
+        if (strcmp(buffer, "exit") == 0) break;
+        printf("received: %s\n", buffer);
+    }
+```
+bagian kode ini untuk menerima pesan dari client menggunakan fungsi read() lalu disimpan ke buffer lalu ditampilkan perintah apa saja yang diterima jika pesan yang diterima "exit" maka akan langusung keluar dari program tersebut
+
+kekurangan program yang saya buat adalah
+- harus menyediakan csv filenya dan change.log filenya dan tidak bisa mendownload csv filenya
+- tidak bisa edit data
+- tidak bisa delete data
+
 ## ***Dokumentasi***
-
-
+![Screenshot from 2024-05-11 18-32-14](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/123524655/72bfe25d-7378-41f8-92d0-f41de5f4b0b3)
+![Screenshot from 2024-05-11 18-32-45](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/123524655/188ed10f-5127-489f-915e-c3f193410fc2)
+![Screenshot from 2024-05-11 18-33-25](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/123524655/90a194fc-8762-41d5-8628-b5649d597d58)
+![Screenshot from 2024-05-11 18-33-31](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/123524655/3a7e7292-d823-4d7d-837b-459b6be27498)
+![Screenshot from 2024-05-11 18-33-39](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/123524655/46b10a90-064c-4876-83b2-cc7362a23c48)
