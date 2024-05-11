@@ -1033,52 +1033,44 @@ return result;
 ```
 1. Deklarasi Array:
 
-- Fungsi intToWords dimulai dengan mendeklarasikan tiga array konstan: satuan, belasan, dan puluh. Array ini digunakan untuk menyimpan kata-kata yang mewakili angka dalam bahasa Indonesia.
+Fungsi intToWords dimulai dengan mendeklarasikan tiga array konstan: satuan, belasan, dan puluh. Array ini digunakan untuk menyimpan kata-kata yang mewakili angka dalam bahasa Indonesia.
 
 2. Pengalokasian Memori:
-
+```
 - Fungsi malloc digunakan untuk mengalokasikan memori untuk string result, yang akan menampung hasil konversi angka ke kata-kata.
-
 - Ukuran memori yang dialokasikan adalah 100 * ukuran char, yang cukup untuk menampung hasil konversi maksimum.
-
+```
 3. Inisialisasi String Kosong:
 
-- String result diinisialisasi dengan string kosong menggunakan strcpy(result, ""). Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.
+String result diinisialisasi dengan string kosong menggunakan strcpy(result, ""). Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.
 
 4. Konversi Ratusan:
-
+```
 - Jika angka lebih besar dari atau sama dengan 100, maka bagian ratusannya akan dikonversi terlebih dahulu.
-
 - Kata yang mewakili bagian ratusan diambil dari array satuan, kemudian ditambahkan dengan kata "ratus".
-
 - Nilai num kemudian di-modulus dengan 100 untuk mendapatkan sisa angka setelah bagian ratusan dihilangkan.
-
+```
 5. Konversi Puluhan:
-
+```
 - Jika angka yang tersisa masih lebih besar dari atau sama dengan 20, maka bagian puluhannya akan dikonversi.
-
 - Kata yang mewakili bagian puluhan diambil dari array puluh.
-
 - Sama seperti sebelumnya, nilai num kemudian di-modulus dengan 10 untuk mendapatkan sisa angka setelah bagian puluhan dihilangkan.
-
+```
 6. Konversi Belasan:
-
+```
 - Jika angka yang tersisa berada dalam rentang 11-19, maka angka tersebut akan dikonversi menjadi bentuk "belasan".
-
 - Kata yang mewakili bagian belasan diambil dari array belasan.
-
+```
 7. Konversi Satuan:
-
+```
 - Jika angka yang tersisa berada dalam rentang 1-9 (setelah bagian ratusan dan puluhan dihilangkan), maka angka tersebut akan dikonversi menjadi bentuk "satuan".
-
 - Kata yang mewakili bagian satuan diambil dari array satuan.
-
+```
 8. Pengembalian Hasil:
-
+```
 - Hasil konversi disimpan dalam string result.
-
 - String result kemudian dikembalikan sebagai hasil fungsi.
-
+```
 ## void writeToLog(const char *operation, int num1, int num2, int result)
 ```c
 // Fungsi menulis ke file log dan kapital
@@ -1112,37 +1104,32 @@ fclose(logFile);
 ```
 1. Membuka File Log:
 
-- Fungsi fopen digunakan untuk membuka file "histori.log" dalam mode append ("a"), yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.
+Fungsi fopen digunakan untuk membuka file "histori.log" dalam mode append ("a"), yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.
 
 2. Pengecekan Ketersediaan File:
 
-- Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka (logFile != NULL), maka operasi akan dilanjutkan.
+Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka (logFile != NULL), maka operasi akan dilanjutkan.
 
 3. Mengambil Waktu Sekarang:
-
+```
 - Fungsi time digunakan untuk mengambil waktu sistem saat ini dalam bentuk waktu mentah (rawtime).
-
 - Waktu mentah kemudian diubah menjadi struktur waktu (struct tm) menggunakan fungsi localtime.
-
 - Informasi waktu kemudian diformat sesuai dengan format yang ditentukan ("[%d/%m/%y %H:%M:%S]") menggunakan fungsi strftime.
-
+```
 4. Konversi Operasi menjadi Uppercase:
 
-- Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi toupper, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.
+Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi toupper, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.
 
 5. Penulisan Pesan Log:
-
+```
 - Jika result kurang dari 0 (negatif), maka pesan log akan mencatat pesan error dengan format yang sesuai.
-
 - Jika result tidak negatif, maka pesan log akan mencatat operasi matematika beserta hasilnya dalam format yang sesuai.
-
 - Untuk merepresentasikan angka dalam kata-kata, fungsi intToWords digunakan untuk mengonversi num1, num2, dan result menjadi bentuk kata-kata yang sesuai.
-
 - Pesan log yang terbentuk akan ditulis ke file log menggunakan fungsi fprintf.
-
+```
 6. Menutup File Log:
 
-- Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose
+Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose
 
 ## int stringToNumber(char *str) 
 ```c
@@ -1158,21 +1145,20 @@ return 0;
 ```
 1. Deklarasi Variabel:
 
-- Variabel words merupakan array konstan yang berisi representasi string dari angka 1 hingga 9 dalam bahasa Indonesia.
-
+Variabel words merupakan array konstan yang berisi representasi string dari angka 1 hingga 9 dalam bahasa Indonesia.
+  
 2. Iterasi Melalui Array:
-   
-- Fungsi ini melakukan iterasi melalui array words untuk mencocokkan string input str dengan setiap elemen array.
+
+Fungsi ini melakukan iterasi melalui array words untuk mencocokkan string input str dengan setiap elemen array.
 
 4. Pengecekan Kesamaan:
-
+```
 - Setiap elemen array words dibandingkan dengan string input str menggunakan fungsi strcmp.
-
 - Jika terdapat kecocokan antara string input str dengan salah satu elemen array, maka fungsi akan mengembalikan nilai integer yang sesuai dengan indeks elemen tersebut (nilai dari 1 hingga 9).
-
+```
 4. Penanganan String Tidak Valid:
 
-- Jika tidak ada kecocokan yang ditemukan, maka fungsi akan mengembalikan nilai 0, menandakan bahwa string input tidak valid atau tidak cocok dengan representasi angka dalam bahasa Indonesia.
+Jika tidak ada kecocokan yang ditemukan, maka fungsi akan mengembalikan nilai 0, menandakan bahwa string input tidak valid atau tidak cocok dengan representasi angka dalam bahasa Indonesia.
 
 ## int main(int argc, char *argv[]) 
 ```c
@@ -1266,34 +1252,31 @@ return 0;
 }
 ```
 1. Input Operasi dan Operand:
-
+```
 - Program memeriksa apakah jumlah argumen command-line sesuai. Jika tidak, program mencetak pesan penggunaan yang benar.
-
 - Operasi matematika (tambah, kurang, kali, bagi) disediakan sebagai argumen command-line.
-
+```
 2. Input Angka:
 
-- Pengguna diminta untuk memasukkan dua angka secara berurutan.
+Pengguna diminta untuk memasukkan dua angka secara berurutan.
 
 3. Konversi Angka ke Integer:
 
-- Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungsi stringToNumber.
+Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungsi stringToNumber.
 
 4. Pembuatan Pipe dan Fork:
-
+```
 - Pipe dibuat untuk komunikasi antara proses induk dan anak.
-
 - Proses anak dibuat menggunakan fork().
-
+```
 5. Child Process:
-
+```
 - Proses anak menutup ujung penulisan pipe, membaca hasil operasi dari pipe, dan menampilkan hasilnya di terminal.
-
 - Hasil operasi ditulis ke file log menggunakan fungsi writeToLog.
-
+```
 6. Parent Process:
 
-- Proses induk menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke pipe, dan menunggu proses anak selesai.
+Proses induk menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke pipe, dan menunggu proses anak selesai.
 
 ## ***Dokumentasi***
 ![Cuplikan layar 2024-05-08 215449](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/0b6678a2-de3f-4fa9-8f86-a6375c4a9a92)
@@ -1725,39 +1708,29 @@ return 0;
 }
 ```
 1. Library
-
+```
 - #include <stdio.h> = fungsi-fungsi input-output c.
-
 - #include <stdlib.h> = fungsi-fungsi dasar seperti alokasi memori
-
 - #include <unistd.h> = fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
-
 - #include <string.h> = fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
-
 - #include <time.h> = fungsi-fungsi untuk manipulasi waktu.
-
 - #include <sys/types.h> = definisi tipe data dasar yang digunakan dalam pemrograman sistem.
-
 - #include <sys/socket.h> = deklarasi fungsi, struktur data, dan konstanta yang digunakan untuk membuat dan mengelola socket.
-
 - #include <netinet/in.h> = deklarasi struktur data dan konstanta yang digunakan untuk menangani alamat Internet (IPv4 dan IPv6).
-
 - #include "actions.c" = Panggil Fungsi Actions.c lewat library
-
+```
 2.Define
 
 #define PORT 8080:
 
-- Ini mendefinisikan konstanta PORT dengan nilai 8080 dan konstanta ini digunakan untuk menentukan nomor port yang akan digunakan oleh server untuk menerima koneksi dari klien.
+Ini mendefinisikan konstanta PORT dengan nilai 8080 dan konstanta ini digunakan untuk menentukan nomor port yang akan digunakan oleh server untuk menerima koneksi dari klien.
 
 #define MAX_COMMAND_SIZE 100:
-
+```
 - Ini mendefinisikan konstanta MAX_COMMAND_SIZE dengan nilai 100.
-
 - Konstanta ini digunakan untuk menentukan ukuran maksimum pesan yang dapat diterima oleh server dari klien.
-
 - Penggunaan konstanta ini memungkinkan program untuk mengalokasikan memori dengan benar saat menerima atau memproses pesan dari klien.**
-
+```
 3. void log_message(char *source, char *command, char *info)
 
 Fungsi ini digunakan untuk menulis pesan log ke file "race.log". Pesan log ini berisi informasi tentang sumber pesan (source), waktu pesan (timestamp), jenis perintah (command), dan informasi tambahan (info). Fungsi ini menggunakan fungsi time() dan localtime() dari library time.h untuk mendapatkan waktu lokal dan fprintf() untuk menulis pesan ke file.
@@ -1765,31 +1738,23 @@ Fungsi ini digunakan untuk menulis pesan log ke file "race.log". Pesan log ini b
 4. void handle_rpc_call(int new_socket)
 
 Fungsi ini merupakan inti dari server. Ini menerima permintaan dari klien melalui socket, memproses permintaan tersebut, dan mengirimkan respons kembali ke klien. Beberapa langkah yang dilakukan adalah:
-
+```
 - Membaca pesan dari socket klien ke dalam buffer.
-
 - Mem-parse pesan menjadi jenis perintah (command) dan informasi tambahan (info).
-
 - Berdasarkan jenis perintah, fungsi memanggil fungsi yang sesuai dari file "actions.c" (yang diimpor melalui preprocessor directive) untuk memproses informasi tambahan.
-
 - Menyiapkan respons berdasarkan hasil pemrosesan dan menulisnya kembali ke socket klien.
-
 - Mencatat pesan log untuk kedua sumber pesan (driver dan paddock).
-
 - Mencetak respons ke konsol untuk melacak aktivitas server.
-
+```
 5. int main ()
 
 Fungsi main adalah titik masuk utama program. Pada fungsi ini:
-
+```
 - Socket server dibuat menggunakan socket() dan dikonfigurasi untuk mendengarkan koneksi di PORT yang ditentukan.
-
 - Loop tak terbatas dimulai, dimana server terus menerima koneksi baru dari klien menggunakan accept().
-
 - Setiap koneksi baru dihandle menggunakan fungsi handle_rpc_call.
-
 - Setelah selesai menangani koneksi, socket baru ditutup dengan close().
-
+```
 ## Driver.c
 ```c
 #include <stdio.h>
@@ -1850,31 +1815,23 @@ Untuk library dan define sama seperti pada **paddock.c**
 2.void send_rpc_command(char* command, char* info)
 
 Fungsi ini digunakan untuk mengirimkan permintaan RPC ke server. Beberapa langkah yang dilakukan adalah:
-
+```
 - Membuat socket menggunakan socket() untuk menghubungkan klien ke server.
-
 - Mengatur alamat server dan port yang dituju menggunakan struct sockaddr_in.
-
 - Menghubungkan klien ke server menggunakan connect().
-
 - Membuat pesan RPC berdasarkan perintah dan informasi yang diberikan oleh pengguna.
-
 - Mengirimkan pesan ke server menggunakan send().
-
 - Menerima respons dari server menggunakan read().
-
 - Mencetak pesan respons ke konsol untuk memantau aktivitas klien.
-
+```
 3. int main()
 
 Fungsi main adalah titik masuk utama program. Pada fungsi ini:
-
+```
 - Dilakukan pemeriksaan terhadap argumen yang diberikan saat menjalankan program.
-
 - Jika argumen tidak sesuai, program mencetak pesan penggunaan dan keluar dengan kode kesalahan.
-
 - Jika argumen sesuai, perintah dan informasi dari argumen digunakan untuk memanggil fungsi send_rpc_command.
-
+```
 ## ***Dokumentasi***
 ![Cuplikan layar 2024-05-08 221153](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/f37a053a-9033-4286-a8d7-87a77ed8ea11)
 ![Cuplikan layar 2024-05-08 221252](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/40c6c69f-dd14-4394-adb8-d59128a79611)
@@ -1884,6 +1841,47 @@ Fungsi main adalah titik masuk utama program. Pada fungsi ini:
 
 
 ## ***SOAL 4 (Abhinaya)***
+Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yang karena sibuk menjadi asisten. Maka dari itu dia membuat list anime yang sedang ongoing (biar tidak lupa) dan yang completed (anime lama tapi pengen ditonton aja). Tapi setelah Lewis pikir-pikir malah kepikiran untuk membuat list anime. Jadi dia membuat file (harap diunduh) dan ingin menggunakan socket yang baru saja dipelajarinya untuk melakukan CRUD pada list animenya. 
+
+a. Client dan server terhubung melalui socket. 
+
+b. client.c di dalam folder client dan server.c di dalam folder server
+
+c. Client berfungsi sebagai pengirim pesan dan dapat menerima pesan dari server.
+
+d. Server berfungsi sebagai penerima pesan dari client dan hanya menampilkan pesan perintah client saja.  
+
+e. Server digunakan untuk membaca myanimelist.csv. Dimana terjadi pengiriman data antara client ke server dan server ke client.
+```
+- Menampilkan seluruh judul
+- Menampilkan judul berdasarkan genre
+- Menampilkan judul berdasarkan hari
+- Menampilkan status berdasarkan berdasarkan judul
+- Menambahkan anime ke dalam file myanimelist.csv
+- Melakukan edit anime berdasarkan judul
+- Melakukan delete berdasarkan judul
+- Selain command yang diberikan akan menampilkan tulisan “Invalid Command”
+```
+f. Karena Lewis juga ingin track anime yang ditambah, diubah, dan dihapus. Maka dia membuat server dapat mencatat anime yang dihapus dalam sebuah log yang diberi nama change.log.
+```
+Format: [date] [type] [massage]
+Type: ADD, EDIT, DEL
+Ex:
+[29/03/24] [ADD] Kanokari ditambahkan.
+[29/03/24] [EDIT] Kamis,Comedy,Kanokari,completed diubah menjadi Jumat,Action,Naruto,completed.
+[29/03/24] [DEL] Naruto berhasil dihapus.
+```
+g. Koneksi antara client dan server tidak akan terputus jika ada kesalahan input dari client, cuma terputus jika user mengirim pesan “exit”. **Program exit** dilakukan pada sisi client.
+
+h. Hasil akhir:
+soal_4/
+    ├── change.log
+    ├── client/
+    │   └── client.c
+    ├── myanimelist.csv
+    └── server/
+        └── server.c
+
 ## ***PENGERJAAN***
 ## ***PENJELASAN PENGERJAAN***
 ## ***Dokumentasi***
