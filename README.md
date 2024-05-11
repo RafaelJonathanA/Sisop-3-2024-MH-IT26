@@ -799,7 +799,7 @@ Ex:
 ```
 
 ## ***PENGERJAAN***
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -970,7 +970,7 @@ return 0;
 ```
 ## ***PENJELASAN PENGERJAAN***
 ## Library
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -1001,7 +1001,7 @@ return 0;
 - <math.h>: fungsi-fungsi matematika
 
 ## char *intToWords(int num)
-```
+```c
 char *intToWords(int num) {
 // Array huruf yang digunakan untuk konversi angka ke kata
 const char *satuan[] = {"", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"};
@@ -1080,7 +1080,7 @@ return result;
 - String result kemudian dikembalikan sebagai hasil fungsi.
 
 ## void writeToLog(const char *operation, int num1, int num2, int result)
-```
+```c
 // Fungsi menulis ke file log dan kapital
 void writeToLog(const char *operation, int num1, int num2, int result) {
 FILE *logFile = fopen("histori.log", "a");
@@ -1145,7 +1145,7 @@ fclose(logFile);
 - Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose
 
 ## int stringToNumber(char *str) 
-```
+```c
 int stringToNumber(char *str) {
     const char *words[] = {"", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan"};
     for (int i = 1; i <= 9; i++) {
@@ -1175,7 +1175,7 @@ return 0;
 - Jika tidak ada kecocokan yang ditemukan, maka fungsi akan mengembalikan nilai 0, menandakan bahwa string input tidak valid atau tidak cocok dengan representasi angka dalam bahasa Indonesia.
 
 ## int main(int argc, char *argv[]) 
-```
+```c
 //Fungsi main untuk input dan manggil void
 int main(int argc, char *argv[]) {
     // Masukkin operasi perhitungan (tambah,kurang,kali,bagi)
@@ -1356,7 +1356,7 @@ Contoh direktori 😶‍🌫️:
 ```
 ## ***PENGERJAAN***
 ### a. actions.c
-```
+```c
 //Fungsi actions.c yang nanti akan dipanggil Paddock.c
 #include <stdio.h>
 #include <string.h>
@@ -1400,7 +1400,7 @@ char* tire_change(char* current_tire) {
 }
 ```
 ### b. driver.c 
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1453,7 +1453,7 @@ return 0;
 }
 ```
 ### c. paddock.c 
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -1563,7 +1563,7 @@ return 0;
 ```
 ## ***PENJELASAN PENGERJAAN***
 ## Actions.c
-```
+```c
 #include <stdio.h>
 #include <string.h>
 
@@ -1616,7 +1616,7 @@ char* tire_change(char* current_tire) {
 Fungsi diatas akan dipanggil oleh paddock.c untuk melengkapi proses pada paddock.c
 
 ## Paddock.c
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -1791,7 +1791,7 @@ Fungsi main adalah titik masuk utama program. Pada fungsi ini:
 - Setelah selesai menangani koneksi, socket baru ditutup dengan close().
 
 ## Driver.c
-```
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
