@@ -986,13 +986,13 @@ return 0;
 
 - <stdlib.h>: fungsi-fungsi dasar seperti alokasi memori, konversi angka, dan fungsi pengaturan lingkungan.
 
-- <unistd.h>: fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
+- <unistd.h>: fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi `fork() dan pipe().`
 
 - <sys/wait.h>: fungsi-fungsi untuk menangani proses anak.
 
-- <string.h>: fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
+- <string.h>: fungsi-fungsi untuk manipulasi string, seperti `strcmp() dan strcpy().`
 
-- <ctype.h>: fungsi-fungsi untuk operasi karakter seperti toupper().
+- <ctype.h>: fungsi-fungsi untuk operasi karakter seperti `toupper().`
 
 - <errno.h>: definisi variabel errno yang menyimpan kode kesalahan terakhir.
 
@@ -1042,7 +1042,7 @@ Fungsi intToWords dimulai dengan mendeklarasikan tiga array konstan: satuan, bel
 ```
 3. Inisialisasi String Kosong:
 
-String result diinisialisasi dengan string kosong menggunakan strcpy(result, ""). Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.
+String result diinisialisasi dengan string kosong menggunakan `strcpy(result, "")`. Hal ini dilakukan untuk memastikan bahwa result kosong sebelum dimulainya konversi.
 
 4. Konversi Ratusan:
 ```
@@ -1104,11 +1104,11 @@ fclose(logFile);
 ```
 1. Membuka File Log:
 
-Fungsi fopen digunakan untuk membuka file "histori.log" dalam mode append ("a"), yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.
+Fungsi fopen digunakan untuk membuka file `"histori.log"` dalam mode `append ("a")`, yang berarti data baru akan ditambahkan ke akhir file tanpa menghapus yang sudah ada.
 
 2. Pengecekan Ketersediaan File:
 
-Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka (logFile != NULL), maka operasi akan dilanjutkan.
+Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log berhasil dibuka `(logFile != NULL)`, maka operasi akan dilanjutkan.
 
 3. Mengambil Waktu Sekarang:
 ```
@@ -1118,7 +1118,7 @@ Dilakukan pengecekan apakah file log berhasil dibuka atau tidak. Jika file log b
 ```
 4. Konversi Operasi menjadi Uppercase:
 
-Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi toupper, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.
+Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan fungsi `toupper`, dan hasilnya disimpan dalam array upperOperation. Hal ini dilakukan agar operasi yang dicatat dalam log berada dalam format huruf kapital.
 
 5. Penulisan Pesan Log:
 ```
@@ -1129,7 +1129,7 @@ Setiap karakter dalam string operation diubah menjadi huruf kapital menggunakan 
 ```
 6. Menutup File Log:
 
-Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi fclose
+Setelah selesai menulis pesan log, file log ditutup menggunakan fungsi `fclose`
 
 ## int stringToNumber(char *str) 
 ```c
@@ -1149,7 +1149,7 @@ Variabel words merupakan array konstan yang berisi representasi string dari angk
   
 2. Iterasi Melalui Array:
 
-Fungsi ini melakukan iterasi melalui array words untuk mencocokkan string input str dengan setiap elemen array.
+Fungsi ini melakukan iterasi melalui array words untuk mencocokkan string input `str` dengan setiap elemen array.
 
 4. Pengecekan Kesamaan:
 ```
@@ -1258,11 +1258,11 @@ return 0;
 ```
 2. Input Angka:
 
-Pengguna diminta untuk memasukkan dua angka secara berurutan.
+User diminta untuk memasukkan dua angka secara berurutan.
 
 3. Konversi Angka ke Integer:
 
-Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungsi stringToNumber.
+Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungsi `stringToNumber`.
 
 4. Pembuatan Pipe dan Fork:
 ```
@@ -1276,7 +1276,7 @@ Angka yang dimasukkan oleh pengguna dikonversi menjadi integer menggunakan fungs
 ```
 6. Parent Process:
 
-Proses induk menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke pipe, dan menunggu proses anak selesai.
+Proses `parents` menutup ujung pembacaan pipe, melakukan operasi aritmatika, menulis hasilnya ke `pipe`, dan menunggu proses `child` selesai.
 
 ## ***Dokumentasi***
 ![Cuplikan layar 2024-05-08 215449](https://github.com/Rafjonath/Sisop-3-2024-MH-IT26/assets/150430084/0b6678a2-de3f-4fa9-8f86-a6375c4a9a92)
@@ -1604,7 +1604,7 @@ char* tire_change(char* current_tire) {
 Fungsi diatas akan dipanggil oleh paddock.c untuk melengkapi proses pada paddock.c
 
 ## Paddock.c
-Program paddock.c akan selalu terhubung dengan actions.c karena program ini yang akan menghubungkan melalui RPC dengan program driver.c sehingga program paddock.c dan actions.c harus dirun bersamaan di dalam direktori server 
+Program paddock.c akan selalu terhubung dengan actions.c karena program ini yang akan menghubungkan melalui RPC dengan program driver.c sehingga program paddock.c dan actions.c harus dirun bersamaan di dalam direktori server. Itu dibuktikan dengan `#include actions.c` yang berguna untuk memanggil program actions.c kedalam program paddock.c.
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1715,21 +1715,39 @@ return 0;
 ```
 1. Library
 ```
-- #include <stdio.h> = fungsi-fungsi input-output c.
-- #include <stdlib.h> = fungsi-fungsi dasar seperti alokasi memori
-- #include <unistd.h> = fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi fork() dan pipe().
-- #include <string.h> = fungsi-fungsi untuk manipulasi string, seperti strcmp() dan strcpy().
-- #include <time.h> = fungsi-fungsi untuk manipulasi waktu.
-- #include <sys/types.h> = definisi tipe data dasar yang digunakan dalam pemrograman sistem.
-- #include <sys/socket.h> = deklarasi fungsi, struktur data, dan konstanta yang digunakan untuk membuat dan mengelola socket.
-- #include <netinet/in.h> = deklarasi struktur data dan konstanta yang digunakan untuk menangani alamat Internet (IPv4 dan IPv6).
-- #include "actions.c" = Panggil Fungsi Actions.c lewat library
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <unistd.h>
+#include <string.h> 
+#include <time.h> 
+#include <sys/types.h> 
+#include <sys/socket.h> 
+#include <netinet/in.h> 
+#include "actions.c" 
 ```
+- <stdio.h> = fungsi-fungsi input-output c.
+
+- <stdlib.h> = fungsi-fungsi dasar seperti alokasi memori
+
+- <unistd.h> = fungsi-fungsi untuk berinteraksi dengan sistem operasi, termasuk fungsi `fork()` dan `pipe()`.
+
+- <string.h> = fungsi-fungsi untuk manipulasi string, seperti `strcmp()` dan `strcpy()`.
+
+- <time.h> = fungsi-fungsi untuk manipulasi waktu.
+
+- <sys/types.h> = definisi tipe data dasar yang digunakan dalam pemrograman sistem.
+
+- <sys/socket.h> = deklarasi fungsi, struktur data, dan konstanta yang digunakan untuk membuat dan mengelola socket.
+
+- <netinet/in.h> = deklarasi struktur data dan konstanta yang digunakan untuk menangani alamat Internet `(IPv4 dan IPv6)`.
+
+- "actions.c" = Panggil Fungsi `actions.c` lewat library
+
 2.Define
 
 #define PORT 8080:
 
-Ini mendefinisikan konstanta PORT dengan nilai 8080 dan konstanta ini digunakan untuk menentukan nomor port yang akan digunakan oleh server untuk menerima koneksi dari klien.
+Ini mendefinisikan konstanta PORT dengan nilai `8080` dan konstanta ini digunakan untuk menentukan nomor port yang akan digunakan oleh server untuk menerima koneksi dari klien.
 
 #define MAX_COMMAND_SIZE 100:
 ```
@@ -1739,7 +1757,7 @@ Ini mendefinisikan konstanta PORT dengan nilai 8080 dan konstanta ini digunakan 
 ```
 3. void log_message(char *source, char *command, char *info)
 
-Fungsi ini digunakan untuk menulis pesan log ke file "race.log". Pesan log ini berisi informasi tentang sumber pesan (source), waktu pesan (timestamp), jenis perintah (command), dan informasi tambahan (info). Fungsi ini menggunakan fungsi time() dan localtime() dari library time.h untuk mendapatkan waktu lokal dan fprintf() untuk menulis pesan ke file.
+Fungsi ini digunakan untuk menulis pesan log ke file `"race.log"`. Pesan log ini berisi informasi tentang sumber pesan `(source)`, waktu pesan `(timestamp)`, jenis perintah `(command)`, dan informasi tambahan `(info)`. Fungsi ini menggunakan fungsi `time()` dan `localtime()` dari library `time.h` untuk mendapatkan waktu `lokal` dan `fprintf()` untuk menulis pesan ke file.
 
 4. void handle_rpc_call(int new_socket)
 
