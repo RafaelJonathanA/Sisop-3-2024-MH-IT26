@@ -1289,12 +1289,16 @@ Shall Leglerg🥶 dan Carloss Signs 😎 adalah seorang pembalap F1 untuk tim Fe
 a. Pada program **actions.c**, program akan berisi function function yang bisa di call oleh **paddock.c**
 
 b. Action berisikan sebagai berikut:
-```
-- Gap [Jarak dengan driver di depan (float)]: Jika Jarak antara Driver dengan Musuh di depan adalah < 3.5s maka return Gogogo, jika jarak > 3.5s dan 10s return Push, dan jika jarak > 10s maka return Stay out of trouble.
+
+- Gap [Jarak dengan driver di depan (float)]: Jika Jarak antara Driver dengan Musuh di depan adalah < 3.5s maka return Gogogo, jika jarak > 3.5s dan 10s return Push, dan jika jarak > 10s maka
+return Stay out of trouble.
+
 - Fuel [Sisa Bensin% (string/int/float)]: Jika bensin lebih dari 80% maka return Push Push Push, jika bensin di antara 50% dan 80% maka return You can go, dan jika bensin kurang dari 50% return Conserve Fuel.
+
 - Tire [Sisa Ban (int)]: Jika pemakaian ban lebih dari 80 maka return Go Push Go Push, jika pemakaian ban diantara 50 dan 80 return Good Tire Wear, jika pemakaian di antara 30 dan 50 return Conserve Your Tire, dan jika pemakaian ban kurang dari 30 maka return Box Box Box.
+
 - Tire Change [Tipe ban saat ini (string)]: Jika tipe ban adalah Soft return Mediums Ready, dan jika tipe ban Medium return Box for Softs.
-```
+
 ```
 Contoh:
 [Driver] : [Fuel] [55%]
@@ -1546,6 +1550,7 @@ return 0;
 ```
 ## ***PENJELASAN PENGERJAAN***
 ## Actions.c
+Pada program actions.c digunakan sebagai tempat untuk menaruh fungsi fungsi yang akan dipanggil kedalam program paddock.c kemudian paddock.c akan menampilkan seluruh informasi yang dibutuhkan oleh driver saat diminta sesuai dengan apa yang ada di action.c
 ```c
 #include <stdio.h>
 #include <string.h>
@@ -1599,6 +1604,7 @@ char* tire_change(char* current_tire) {
 Fungsi diatas akan dipanggil oleh paddock.c untuk melengkapi proses pada paddock.c
 
 ## Paddock.c
+Program paddock.c akan selalu terhubung dengan actions.c karena program ini yang akan menghubungkan melalui RPC dengan program driver.c sehingga program paddock.c dan actions.c harus dirun bersamaan di dalam direktori server 
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1756,6 +1762,7 @@ Fungsi main adalah titik masuk utama program. Pada fungsi ini:
 - Setelah selesai menangani koneksi, socket baru ditutup dengan close().
 ```
 ## Driver.c
+Program driver.c sebagi client atau user akan melakukan input yang diinginkan lalu diteruskan ke program paddock.c untuk mendapatkan jawaban yang user inginkan 
 ```c
 #include <stdio.h>
 #include <stdlib.h>
