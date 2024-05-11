@@ -35,9 +35,725 @@
    - server/
      -  server.c
 ```
+
 ## ***SOAL 1 (Rafael)***
+1. Pada zaman dahulu pada galaksi yang jauh-jauh sekali, hiduplah seorang Stelle. Stelle adalah seseorang yang sangat tertarik dengan Tempat Sampah dan Parkiran Luar Angkasa. Stelle memulai untuk mencari Tempat Sampah dan Parkiran yang terbaik di angkasa. Dia memerlukan program untuk bisa secara otomatis mengetahui Tempat Sampah dan Parkiran dengan rating terbaik di angkasa. Programnya berbentuk microservice sebagai berikut:
+
+a. Dalam auth.c pastikan file yang masuk ke folder new-entry adalah file csv dan berakhiran  trashcan dan parkinglot. Jika bukan, program akan secara langsung akan delete file tersebut. 
+Contoh dari nama file yang akan diautentikasi:
+- belobog_trashcan.csv
+- osaka_parkinglot.csv
+
+b. Format data (Kolom) yang berada dalam file csv adalah seperti berikut:
+```
+belobog_trashcan.csv 
+name, rating
+Qlipoth Fort, 9.7
+Rivet Town, 6.0
+Everwinter Hill, 8.7
+
+osaka_parkinglot.csv
+name, rating
+Kiseki, 9.7
+Dotonbori, 8.6
+Osaka Castle, 8.5
+
+```
+c. File csv yang lolos tahap autentikasi akan dikirim ke shared memory. 
+
+d. Dalam rate.c, proses akan mengambil data csv dari shared memory dan akan memberikan output Tempat Sampah atau Parkiran dengan Rating Terbaik dari data tersebut.
+
+e. Pada db.c, proses bisa memindahkan file dari new-data ke folder microservices/database, WAJIB MENGGUNAKAN SHARED MEMORY.
+
+f. Log semua file yang masuk ke folder microservices/database ke dalam file db.log dengan contoh format sebagai berikut:
+[DD/MM/YY hh:mm:ss] [type] [filename]
+ex : `[07/04/2024 08:34:50] [Trash Can] [belobog_trashcan.csv]
+
+Contoh direktori awal:
+```
+.
+├── auth.c
+├── microservices
+│   ├── database
+│   │   └── db.log
+│   ├── db.c
+│   └── rate.c
+└── new-data
+    ├── belobog_trashcan.csv
+    ├── ikn.csv
+    └── osaka_parkinglot.csv
+
+Contoh direktori akhir setelah dijalankan auth.c dan db.c:
+.
+├── auth.c
+├── microservices
+│   ├── database
+│   │   ├── belobog_trashcan.csv
+│   │   ├── db.log
+│   │   └── osaka_parkinglot.csv
+│   ├── db.c
+│   └── rate.c
+└── new-data
+
+```
 ## ***PENGERJAAN***
+### auth.c 
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+
+
+/*void logFileOperation(const char *filename, const char *action) {
+    printf("File %s %s\n", action, filename);
+}
+*/ 
+int main() {
+    // Membuat shared memory yang akan digunakan untuk menyimpan nama file
+    key_t key = 1234;
+    int shmid = shmget(key, sizeof(char) * 10 * 256, IPC_CREAT | 0666);
+    char (*shm)[10][256] = shmat(shmid, NULL, 0);
+
+    // Membuka direktori dari new-data
+    DIR *dir;
+    struct dirent *entry;
+    struct stat statbuf;
+    char filename[256];
+    int file_count = 0;
+
+    dir = opendir("/home/ubuntu/SISOP/modul3/soal_1/new-data");
+    if (dir == NULL) {
+        printf("Cannot open directory\n");
+        return 1;
+    }
+
+    // Mengirim nama file yang berakhiran _trashcan.csv dan _parkinglot.csv ke shared memory
+    while ((entry = readdir(dir)) != NULL && file_count < 10) {
+        sprintf(filename, "%s", entry->d_name);
+        if (strlen(filename) < 256) {
+            if (strstr(filename, "_trashcan.csv") || strstr(filename, "_parkinglot.csv")) {
+                strcpy((*shm)[file_count], filename);
+                file_count++;
+                //logFileOperation(filename, "sent");
+            } else {
+                // Hapus file yang bukan _trashcan.csv ataupun _parkinglot.csv
+                char filepath[256 + 100]; 
+                sprintf(filepath, "/home/ubuntu/SISOP/modul3/soal_1/new-data/%s", filename);
+                remove(filepath);
+                //logFileOperation(filename, "deleted");
+            }
+        }
+    }
+
+    closedir(dir);
+    shmdt(shm);
+
+    return 0;
+}
+```
+### rate.c 
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+// Struktur untuk menyimpan informasi tentang tempat sampah atau tempat parkir
+typedef struct {
+    char type[20];      
+    char filename[256]; 
+    char name[100];     
+    float rating;       
+} PlaceInfo;
+
+int main() {
+// masuk ke shared memory yang sudah dibuat
+    key_t key = 1234;
+    int shmid = shmget(key, sizeof(char) * 10 * 256, IPC_CREAT | 0666);
+    char (*shm)[10][256] = shmat(shmid, NULL, 0);
+
+    PlaceInfo places[10];
+    int place_count = 0;
+
+    // Membaca informasi dari shared memory yang sudah dibuat di auth
+    for (int i = 0; i < 10; i++) {
+        if ((*shm)[i][0] == '\0') 
+            break;
+
+        char *filename = (*shm)[i];
+
+        char filepath[512];
+        sprintf(filepath, "/home/ubuntu/SISOP/modul3/soal_1/new-data/%s", filename);
+
+        FILE *file = fopen(filepath, "r");
+        if (file == NULL) {
+            printf("Cannot open file: %s\n", filepath);
+            continue;
+        }
+
+        // Menskip header dari file
+    char header[1024];
+    fgets(header, sizeof(header), file); 
+
+    char name[100];
+    float rating;
+    while (fscanf(file, "%[^,],%f", name, &rating) == 2) {
+        // Membaca file mulai dari tipenya namanya dan ratingnya
+        strcpy(places[place_count].type, strstr(filename, "trashcan.csv") ? "Trash Can" : "Parking Lot");
+        strcpy(places[place_count].filename, filename);
+        strcpy(places[place_count].name, name);  
+        places[place_count].rating = rating;
+        place_count++;
+    }
+
+    fclose(file);
+}
+    // Cari rating tertinggi dari kedua  tipe trashcan dan parkinglot
+    float max_rating_trashcan = 0.0;
+    float max_rating_parkinglot = 0.0;
+    int max_index_trashcan = -1;
+    int max_index_parkinglot = -1;
+
+    for (int i = 0; i < place_count; i++) {
+        if (strcmp(places[i].type, "Trash Can") == 0) {
+            if (places[i].rating > max_rating_trashcan) {
+                max_rating_trashcan = places[i].rating;
+                max_index_trashcan = i;
+            }
+        } else if (strcmp(places[i].type, "Parking Lot") == 0) {
+            if (places[i].rating > max_rating_parkinglot) {
+                max_rating_parkinglot = places[i].rating;
+                max_index_parkinglot = i;
+            }
+        }
+    }
+
+
+    // Menampilkan hasil yang tertinggi ratingnya 
+    printf("\nHighest rated places:\n\n");
+
+    if (max_index_trashcan != -1) {
+        printf("Type: Trash Can\n");
+        printf("Filename: %s\n", places[max_index_trashcan].filename);
+        printf("----------------------------------------\n");
+        printf("Name: %s\n", places[max_index_trashcan].name);
+        printf("Rating: %.1f\n\n", places[max_index_trashcan].rating);
+    } else {
+        printf("No highest rated Trash Can found.\n\n");
+    }
+
+    if (max_index_parkinglot != -1) {
+        printf("Type: Parking Lot\n");
+        printf("Filename: %s\n", places[max_index_parkinglot].filename);
+        printf("----------------------------------------\n");
+        printf("Name: %s\n", places[max_index_parkinglot].name);
+        printf("Rating: %.1f\n\n", places[max_index_parkinglot].rating);
+    } else {
+        printf("No highest rated Parking Lot found.\n\n");
+    }
+
+ // menghapus shared memory
+    shmdt(shm);
+    shmctl(shmid, IPC_RMID, NULL);
+
+    return 0;
+}
+```
+### db.c 
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <time.h>
+
+// Fungsi untuk menuliskan ke dalam log 
+void log_to_file(const char *type, const char *filename) {
+    FILE *log_file = fopen("/home/ubuntu/SISOP/modul3/soal_1/microservices/database/db.log", "a");
+    if (log_file != NULL) {
+        time_t current_time = time(NULL);
+        struct tm *tm_info;
+        tm_info = localtime(&current_time);
+        fprintf(log_file, "[%02d/%02d/%04d %02d:%02d:%02d] [%s] [%s]\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900, tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec, type, filename);
+        fclose(log_file);
+    } else {
+        printf("Failed to open log file.\n");
+    }
+}
+
+int main() {
+    // Masuk  ke shared memory
+    key_t key = 1234;
+    int shmid = shmget(key, sizeof(char) * 10 * 256, 0666);
+    char (*shm)[10][256] = shmat(shmid, NULL, 0);
+
+    //Mengecek apakah ada shared memory
+    if (shm == (char (*)[10][256]) -1) {
+        printf("Shared memory kosong\n");
+        return 1;
+    }
+
+    // Membuka directory new-data
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir("/home/ubuntu/SISOP/modul3/soal_1/new-data")) != NULL) {
+
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {  
+                char filepath[256];
+                snprintf(filepath, sizeof(filepath), "/home/ubuntu/SISOP/modul3/soal_1/new-data/%s", ent->d_name);
+
+                char newpath[256];
+                snprintf(newpath, sizeof(newpath), "/home/ubuntu/SISOP/modul3/soal_1/microservices/database/%s", ent->d_name);
+
+                // Menentukan tipe file 
+                char *type;
+                if (strstr(ent->d_name, "_trashcan.csv") != NULL) {
+                    type = "Trash Can";
+                } else if (strstr(ent->d_name, "_parkinglot.csv") != NULL) {
+                    type = "Parking Lot";
+                } else {
+                    type = "Tidak ada";
+                }
+
+                if (rename(filepath, newpath) == 0) {
+                    log_to_file(type, ent->d_name);
+                   
+                } else {
+                    perror("rename");
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("opendir");
+        return 1;
+    }
+
+    // Menghapus shared memory
+    shmdt(shm);
+    shmctl(shmid, IPC_RMID, NULL);
+      
+    return 0;
+}
+```
+
 ## ***PENJELASAN PENGERJAAN***
+### auth.c 
+Adalah kode yang berfungsi menyortir nama-nama file yang terdapat dalam folder atau direktori new-data, dimana nama-nama file yang diizinkan ada adalah nama file yang berakhiran _trashcan.csv atau _parkinglot.csv setelah itu semua file yang diizinkan tersebut akan dikirim ke shared memory (nama filenya). 
+
+#### Penjelasan
+
+```c
+key_t key = 1234;
+int shmid = shmget(key, sizeof(char) * 10 * 256, IPC_CREAT | 0666);
+char (*shm)[10][256] = shmat(shmid, NULL, 0);
+
+```
+Dari kode diatas 
+
+key_t key = 1234: Mendefinisikan kunci untuk shared memory dengan nilai 1234.
+int shmid = shmget(key, sizeof(char) * 10 * 256, IPC_CREAT | 0666):
+shmget() digunakan untuk membuat atau mendapatkan ID shared memory.
+key adalah kunci untuk mengidentifikasi shared memory.
+sizeof(char) * 10 * 256 adalah ukuran shared memory yang dibuat, yaitu 10 array string dengan panjang maksimal 256 karakter per string.
+IPC_CREAT digunakan untuk membuat shared memory jika belum ada.
+0666 adalah mode akses untuk shared memory.
+char (*shm)[10][256] = shmat(shmid, NULL, 0):
+shmat() digunakan untuk menyatukan shared memory ke dalam alamat memori proses.
+shmid adalah ID shared memory yang akan disatukan.
+NULL berarti sistem akan memilih alamat yang cocok secara otomatis.
+0 menunjukkan mode akses read/write untuk shared memory.
+shm adalah pointer ke shared memory yang telah disatukan.
+
+```c
+DIR *dir;
+struct dirent *entry;
+dir = opendir("/home/ubuntu/SISOP/modul3/soal_1/new-data");
+if (dir == NULL) {
+    printf("Cannot open directory\n");
+    return 1;
+}
+```
+Kode diatas bertujuan untuk membuka direktori yang sesuai (/home/ubuntu/SISOP/modul3/soal_1/new-data) apabila tidak ada dirktorinya maka akan mengeluarkan output cannot open directory. 
+
+```c
+// Mengirim nama file yang berakhiran _trashcan.csv dan _parkinglot.csv ke shared memory
+    while ((entry = readdir(dir)) != NULL && file_count < 10) {
+        sprintf(filename, "%s", entry->d_name);
+        if (strlen(filename) < 256) {
+            if (strstr(filename, "_trashcan.csv") || strstr(filename, "_parkinglot.csv")) {
+                strcpy((*shm)[file_count], filename);
+                file_count++;
+                //logFileOperation(filename, "sent");
+            } else {
+                // Hapus file yang bukan _trashcan.csv ataupun _parkinglot.csv
+                char filepath[256 + 100]; 
+                sprintf(filepath, "/home/ubuntu/SISOP/modul3/soal_1/new-data/%s", filename);
+                remove(filepath);
+                //logFileOperation(filename, "deleted");
+            }
+        }
+    }
+
+    closedir(dir);
+    shmdt(shm);
+
+    return 0;
+```
+Kode diatas berfungsi untuk membaca semua nama file yang ada pada direktori yang telah dibuka sebelumnya lalu memeriksa setiap file yang ada apakah sesuai atau tidak namanya dan bila sudah sesuai maka akan dikirim ke shared memory namun apabilaa tidak sesua maka akan di hapus. Dimana dari kode tersebut:  
+
+readdir(dir) digunakan untuk membaca setiap entri dalam direktori.
+Iterasi dilakukan selama masih ada entri dan jumlah file yang disimpan kurang dari 10.
+sprintf(filename, "%s", entry->d_name) digunakan untuk menyalin nama file dari entry->d_name ke filename.
+Jika panjang nama file kurang dari 256 karakter, maka program akan memproses file tersebut. 
+
+Jika nama file mengandung _trashcan.csv atau _parkinglot.csv, maka nama file disalin ke shared memory menggunakan strcpy((*shm)[file_count], filename), dan penghitung file_count ditingkatkan.
+Jika nama file tidak mengandung _trashcan.csv atau _parkinglot.csv, maka file tersebut dihapus dengan menggunakan remove(filepath), di mana filepath adalah jalur lengkap file yang akan dihapus.
+
+Lalu setelah itu akan menutup shared memory agar dapat dipakai oleh proses lain 
+
+### rate.c  
+Adalah kode yang bertujuan untuk mengambil nama file di shared memory yang sudah dibuat oleh auth.c lalu setelah itu akan melihat directory new-data dan mencocokkan nama file yang didapat dari shared memory lalu akan membaca file tersebut dan mencari ratinng tertinggi dari file tersebut lalu menampilkan siapa yang paling tinggi langsung di terminal. 
+
+#### Fungsi-Fungsi yang digunakan pada kode ini 
+
+##### `shmget(key, size, flags)`
+
+Fungsi `shmget` digunakan untuk membuat atau mendapatkan ID shared memory.
+
+- `key` adalah kunci yang digunakan untuk mengidentifikasi shared memory.
+- `size` adalah ukuran shared memory yang akan dibuat (dalam byte).
+- `flags` adalah flag yang mengontrol operasi `shmget`. Dalam kode ini, digunakan `IPC_CREAT | 0666`, yang berarti membuat shared memory baru jika belum ada dengan mode akses 0666 (read/write untuk user, group, dan other).
+
+##### `shmat(shmid, addr, flags)`
+
+Fungsi `shmat` digunakan untuk menyatukan shared memory ke dalam alamat memori proses.
+
+- `shmid` adalah ID shared memory yang akan disatukan.
+- `addr` adalah alamat memori yang diinginkan untuk menyatukan shared memory. Jika `NULL`, sistem akan memilih alamat yang cocok secara otomatis.
+- `flags` adalah flag yang mengontrol operasi `shmat`. Dalam kode ini, digunakan `0`, yang berarti mode akses read/write.
+
+##### `opendir(path)`
+
+Fungsi `opendir` digunakan untuk membuka direktori yang ditentukan oleh `path`.
+
+- `path` adalah jalur direktori yang akan dibuka.
+- Fungsi ini mengembalikan pointer ke objek `DIR` jika berhasil, atau `NULL` jika gagal.
+
+##### `readdir(dir)`
+
+Fungsi `readdir` digunakan untuk membaca entri berikutnya dalam direktori yang telah dibuka.
+
+- `dir` adalah pointer ke objek `DIR` yang diperoleh dari `opendir`.
+- Fungsi ini mengembalikan pointer ke objek `struct dirent` yang berisi informasi tentang entri direktori, atau `NULL` jika tidak ada entri lagi yang dapat dibaca.
+
+##### `fopen(path, mode)`
+
+Fungsi `fopen` digunakan untuk membuka file dengan jalur dan mode yang ditentukan.
+
+- `path` adalah jalur file yang akan dibuka.
+- `mode` adalah mode yang menentukan operasi yang dapat dilakukan pada file (misal: "r" untuk read, "w" untuk write, "a" untuk append).
+
+##### `fgets(str, size, stream)`
+
+Fungsi `fgets` digunakan untuk membaca baris teks dari file.
+
+- `str` adalah buffer tempat baris teks akan disimpan.
+- `size` adalah ukuran maksimum buffer.
+- `stream` adalah pointer ke objek `FILE` yang diperoleh dari `fopen`.
+
+##### `fscanf(stream, format, ...)`
+
+Fungsi `fscanf` digunakan untuk membaca data terformattir dari file.
+
+- `stream` adalah pointer ke objek `FILE` yang diperoleh dari `fopen`.
+- `format` adalah string format yang menentukan bagaimana data akan dibaca.
+
+##### `strcpy(dest, src)`
+
+Fungsi `strcpy` digunakan untuk menyalin string `src` ke `dest`.
+
+##### `strcmp(str1, str2)`
+
+Fungsi `strcmp` digunakan untuk membandingkan dua string `str1` dan `str2`.
+
+##### `shmdt(addr)`
+
+Fungsi `shmdt` digunakan untuk melepaskan shared memory dari alamat memori proses.
+
+- `addr` adalah alamat shared memory yang akan dilepaskan.
+
+##### `shmctl(shmid, cmd, buf)`
+
+Fungsi `shmctl` digunakan untuk melakukan operasi kontrol pada shared memory.
+
+- `shmid` adalah ID shared memory.
+- `cmd` adalah perintah yang akan dilakukan (misal: `IPC_RMID` untuk menghapus shared memory).
+
+#### Penjelasan 
+```c
+key_t key = 1234;
+int shmid = shmget(key, sizeof(char) * 10 * 256, IPC_CREAT | 0666);
+char (*shm)[10][256] = shmat(shmid, NULL, 0);
+```
+Kode ini berfungsi untuk masuk ke shared memory yang sudah dibuat oleh auth.c 
+
+```c 
+for (int i = 0; i < 10; i++) {
+    if ((*shm)[i][0] == '\0')
+        break;
+
+    char *filename = (*shm)[i];
+    char filepath[512];
+    sprintf(filepath, "/home/ubuntu/SISOP/modul3/soal_1/new-data/%s", filename);
+
+    FILE *file = fopen(filepath, "r");
+    if (file == NULL) {
+        printf("Cannot open file: %s\n", filepath);
+        continue;
+    }
+
+    // Menskip header dari file
+    char header[1024];
+    fgets(header, sizeof(header), file);
+
+    char name[100];
+    float rating;
+    while (fscanf(file, "%[^,],%f", name, &rating) == 2) {
+        // Membaca file mulai dari tipenya namanya dan ratingnya
+        strcpy(places[place_count].type, strstr(filename, "trashcan.csv") ? "Trash Can" : "Parking Lot");
+        strcpy(places[place_count].filename, filename);
+        strcpy(places[place_count].name, name);
+        places[place_count].rating = rating;
+        place_count++;
+    }
+
+    fclose(file);
+}
+```
+Kode ini berfungsi untuk membaca apa isi shared memory dan bila menemukannya maka akan mencocokkan namanya dengan direktori new-data lalu setelah itu akan membaca isi dari filenya dan menentukan tipe dari file tersebut trash can atau parking lot denga acuan nama dari file lalu setelah itu mengambil nama tempat dan ratingnya lalu setelah itu menutup file. 
+
+```c
+float max_rating_trashcan = 0.0;
+float max_rating_parkinglot = 0.0;
+int max_index_trashcan = -1;
+int max_index_parkinglot = -1;
+
+for (int i = 0; i < place_count; i++) {
+    if (strcmp(places[i].type, "Trash Can") == 0) {
+        if (places[i].rating > max_rating_trashcan) {
+            max_rating_trashcan = places[i].rating;
+            max_index_trashcan = i;
+        }
+    } else if (strcmp(places[i].type, "Parking Lot") == 0) {
+        if (places[i].rating > max_rating_parkinglot) {
+            max_rating_parkinglot = places[i].rating;
+            max_index_parkinglot = i;
+        }
+    }
+}
+
+printf("\nHighest rated places:\n\n");
+
+if (max_index_trashcan != -1) {
+    printf("Type: Trash Can\n");
+    printf("Filename: %s\n", places[max_index_trashcan].filename);
+    printf("----------------------------------------\n");
+    printf("Name: %s\n", places[max_index_trashcan].name);
+    printf("Rating: %.1f\n\n", places[max_index_trashcan].rating);
+} else {
+    printf("No highest rated Trash Can found.\n\n");
+}
+
+if (max_index_parkinglot != -1) {
+    printf("Type: Parking Lot\n");
+    printf("Filename: %s\n", places[max_index_parkinglot].filename);
+    printf("----------------------------------------\n");
+    printf("Name: %s\n", places[max_index_parkinglot].name);
+    printf("Rating: %.1f\n\n", places[max_index_parkinglot].rating);
+} else {
+    printf("No highest rated Parking Lot found.\n\n");
+}
+
+shmdt(shm);
+shmctl(shmid, IPC_RMID, NULL);
+```
+Lalu setelah mendapat semua data dari file dengan kode diatas rating tersebut akan dibandingkan yang mana yang paling besar sesuai dengaan tipenya misalkan tipenya trashcan maka hanya membandingkannya dengn file tipe trashcan saja yang parking lot juga sama hanya yang parking lot saja yang dibandingkan setelah mendapat nilai yang terbesar baru ditampilkan di terminal sesuai tipe dan ratingnya dan apabila tidak ada yang tertinggi maka akan menampilkan no highest rated parking lot found. 
+
+Setelah itu akan melepas shared memory dan menghapusnya. 
+
+### db.c 
+Adalah kode yang bertujuan untuk mengambil nama file pada shared memory lalu setelah itu akan mencocokkan namanya dengan direktori new-data dan apabila ada maka file tersebut akan dipindahkan ke direktori database. Setelah berhasil memindahkan maka akan ditulis ke dalam db.log untuk didata sesuai dengan kategori dan nama filenya. 
+
+#### `Fungsi-Fungsi yang dipakai dalam kode ini`
+
+##### `log_to_file(const char *type, const char *filename)`
+
+Fungsi ini digunakan untuk mencatat informasi perpindahan file ke dalam file log.
+
+- `type`: Tipe file (Trash Can, Parking Lot, atau Tidak ada).
+- `filename`: Nama file yang dipindahkan.
+
+##### `shmget(key, size, flags)`
+
+Fungsi `shmget` digunakan untuk membuat atau mendapatkan ID shared memory.
+
+- `key` adalah kunci yang digunakan untuk mengidentifikasi shared memory.
+- `size` adalah ukuran shared memory yang akan dibuat (dalam byte).
+- `flags` adalah flag yang mengontrol operasi `shmget`. Dalam kode ini, digunakan `0666`, yang berarti membuat shared memory baru dengan mode akses 0666 (read/write untuk user, group, dan other).
+
+##### `shmat(shmid, addr, flags)`
+
+Fungsi `shmat` digunakan untuk menyatukan shared memory ke dalam alamat memori proses.
+
+- `shmid` adalah ID shared memory yang akan disatukan.
+- `addr` adalah alamat memori yang diinginkan untuk menyatukan shared memory. Jika `NULL`, sistem akan memilih alamat yang cocok secara otomatis.
+- `flags` adalah flag yang mengontrol operasi `shmat`. Dalam kode ini, digunakan `0`, yang berarti mode akses read/write.
+
+##### `opendir(path)`
+
+Fungsi `opendir` digunakan untuk membuka direktori yang ditentukan oleh `path`.
+
+- `path` adalah jalur direktori yang akan dibuka.
+- Fungsi ini mengembalikan pointer ke objek `DIR` jika berhasil, atau `NULL` jika gagal.
+
+##### `readdir(dir)`
+
+Fungsi `readdir` digunakan untuk membaca entri berikutnya dalam direktori yang telah dibuka.
+
+- `dir` adalah pointer ke objek `DIR` yang diperoleh dari `opendir`.
+- Fungsi ini mengembalikan pointer ke objek `struct dirent` yang berisi informasi tentang entri direktori, atau `NULL` jika tidak ada entri lagi yang dapat dibaca.
+
+##### `snprintf(str, size, format, ...)`
+
+Fungsi `snprintf` digunakan untuk memformat string dengan menggabungkan beberapa bagian string.
+
+- `str` adalah buffer tempat string yang diformat akan disimpan.
+- `size` adalah ukuran maksimum buffer.
+- `format` adalah string format yang menentukan bagaimana data akan ditulis.
+
+
+##### `strstr(haystack, needle)`
+
+Fungsi `strstr` digunakan untuk mencari substring `needle` dalam string `haystack`.
+
+##### `rename(oldpath, newpath)`
+
+Fungsi `rename` digunakan untuk memindahkan file atau direktori dari satu lokasi ke lokasi lain.
+
+- `oldpath` adalah jalur file atau direktori yang akan dipindahkan.
+- `newpath` adalah jalur file atau direktori baru setelah pemindahan.
+
+##### `perror(str)`
+
+Fungsi `perror` digunakan untuk mencetak pesan error ke `stderr`.
+
+- `str` adalah string yang akan dicetak sebelum pesan error.
+
+##### `shmdt(addr)`
+
+Fungsi `shmdt` digunakan untuk melepaskan shared memory dari alamat memori proses.
+
+- `addr` adalah alamat shared memory yang akan dilepaskan.
+
+##### `shmctl(shmid, cmd, buf)`
+
+Fungsi `shmctl` digunakan untuk melakukan operasi kontrol pada shared memory.
+
+- `shmid` adalah ID shared memory.
+- `cmd` adalah perintah yang akan dilakukan (misal: `IPC_RMID` untuk menghapus shared memory).
+
+#### Pejelasan kode
+
+```c
+void log_to_file(const char *type, const char *filename) {
+    FILE *log_file = fopen("/home/ubuntu/SISOP/modul3/soal_1/microservices/database/db.log", "a");
+    if (log_file != NULL) {
+        time_t current_time = time(NULL);
+        struct tm *tm_info;
+        tm_info = localtime(&current_time);
+        fprintf(log_file, "[%02d/%02d/%04d %02d:%02d:%02d] [%s] [%s]\n", tm_info->tm_mday, tm_info->tm_mon + 1, tm_info->tm_year + 1900, tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec, type, filename);
+        fclose(log_file);
+    } else {
+        printf("Failed to open log file.\n");
+    }
+}
+```
+Kode diatas bertujuan untuk mencatat setiap file yang berhasil dipindahkan oleh db.c sesuai dengan tipe dan nama filenya dan kode ini akan menuliskannyaa sesuai dengan tempaatnya yaitu db.log yang ada di direktori database setelah itu akan menutup log file
+```c
+int main() {
+    // Masuk  ke shared memory
+    key_t key = 1234;
+    int shmid = shmget(key, sizeof(char) * 10 * 256, 0666);
+    char (*shm)[10][256] = shmat(shmid, NULL, 0);
+
+    //Mengecek apakah ada shared memory
+    if (shm == (char (*)[10][256]) -1) {
+        printf("Shared memory kosong\n");
+        return 1;
+    }
+}
+```
+Kode ini berfuuungsi untuk masuk ke dalam shared memory yang telah dibuat oleh auth.c sebelumnya. 
+```c
+    // Membuka directory new-data
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir("/home/ubuntu/SISOP/modul3/soal_1/new-data")) != NULL) {
+
+        while ((ent = readdir(dir)) != NULL) {
+            if (ent->d_type == DT_REG) {  
+                char filepath[256];
+                snprintf(filepath, sizeof(filepath), "/home/ubuntu/SISOP/modul3/soal_1/new-data/%s", ent->d_name);
+
+                char newpath[256];
+                snprintf(newpath, sizeof(newpath), "/home/ubuntu/SISOP/modul3/soal_1/microservices/database/%s", ent->d_name);
+
+                // Menentukan tipe file 
+                char *type;
+                if (strstr(ent->d_name, "_trashcan.csv") != NULL) {
+                    type = "Trash Can";
+                } else if (strstr(ent->d_name, "_parkinglot.csv") != NULL) {
+                    type = "Parking Lot";
+                } else {
+                    type = "Tidak ada";
+                }
+
+                if (rename(filepath, newpath) == 0) {
+                    log_to_file(type, ent->d_name);
+                   
+                } else {
+                    perror("rename");
+                }
+            }
+        }
+        closedir(dir);
+    } else {
+        perror("opendir");
+        return 1;
+    }
+
+    // Menghapus shared memory
+    shmdt(shm);
+    shmctl(shmid, IPC_RMID, NULL);
+      
+    return 0;
+
+```
+Dan kode ini berfungsi untuk memindahkan semua file yang ada di new-data sesuai dengan nama file yang telah didapat dari shared memory karena itu terdapat kode untuk membaca shared memory lalu mencocokkan nama file yanng didapat dengan direktori new-data setelah itu baru akan memindahkannya ke database dan juga terdapat kode untuk mendeteksi type dari file apakah itu trashcan atau parkinglot sesuai dengan nama filenya setelah itu type ini akan digunakan dalam penulisan dalam log file setelah itu kode akan melepas shared memory dan menghapusnya. 
+
+
 ## ***Dokumentasi***
 
 ## ***SOAL 2 (Fidel)***
